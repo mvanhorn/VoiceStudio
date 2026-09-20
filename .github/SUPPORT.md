@@ -36,6 +36,14 @@ archive.
 2. Run the in-app self-check: **Settings → About → Run self-check**.
 3. Search existing issues; add a 👍 + your details to an existing one rather than opening a duplicate.
 
+## Backend still starting
+
+Work requested while the backend is coming up (including Convert) gets an
+expected HTTP 503 with a `[starting]` marker. Wait and retry after it is
+ready. If startup never finishes, check **Settings → Logs → Backend** (or
+the terminal log in a source/dev run) for the stall point — that is not a
+bug-report case by itself.
+
 ## Response expectations
 
 This is an open-source project maintained with the help of an automated triage

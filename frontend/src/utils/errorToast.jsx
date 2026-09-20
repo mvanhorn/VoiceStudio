@@ -18,18 +18,24 @@ import { openBugReport } from './bugReport';
 // #1276 adds [shutting_down]: the backend is on its way out, so nothing
 // failed and there is nothing to report.
 //
+// #2160 adds [starting]: the backend is not ready yet, so wait and retry
+// rather than filing a bug. Matched on the marker, never on the English
+// phase label the backend interpolates.
+//
 // Matched on the MARKER, never on the bare 503 status. 503 is also how a real
 // engine-load timeout and an unavailable engine are reported (#1246, #1260,
 // #1277) — those are genuine bugs users need to file, and keying off the
 // status alone would silence exactly that class.
 //
 // Markers are emitted by the backend ([clone_ref_unusable] in
-// omnivoice/utils/audio.py, [shutting_down] in main.py) — keep in sync.
+// omnivoice/utils/audio.py, [shutting_down] and [starting] in main.py) —
+// keep in sync.
 const USER_FIXABLE_MARKERS = {
   '[clone_ref_unusable]': 'tts_errors.ref_audio_unusable',
   '[clone_ref_too_long]': 'tts_errors.ref_audio_too_long',
   '[clone_ref_no_speech]': 'tts_errors.ref_audio_no_speech',
   '[shutting_down]': 'errors.backend_shutting_down',
+  '[starting]': 'errors.backend_starting',
 };
 
 // #1771: the voice-design instruct validator (omnivoice/models/omnivoice.py::

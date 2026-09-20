@@ -21,6 +21,33 @@ vi.mock('../utils/bugReport', () => ({ openBugReport: vi.fn() }));
 
 import { toastErrorWithReport } from '../utils/errorToast';
 
+// Enumerated rather than globbed: a `>= 21` count over readdir() passes
+// even when a supported locale is missing, as long as some other .json
+// makes up the number. Naming the files means dropping one fails here.
+const SUPPORTED_LOCALES = [
+  'ar',
+  'de',
+  'en',
+  'es',
+  'fr',
+  'hi',
+  'id',
+  'it',
+  'ja',
+  'ko',
+  'nl',
+  'pl',
+  'pt',
+  'ru',
+  'sv',
+  'th',
+  'tr',
+  'uk',
+  'vi',
+  'zh-CN',
+  'zh-TW',
+];
+
 const BACKEND_ERROR =
   '400 Bad Request: [clone_ref_unusable] Reference audio has no usable sound — ' +
   'the clip is empty or completely silent, so there is no voice to clone.';
@@ -114,33 +141,6 @@ describe('toastErrorWithReport voice-design instruct guidance (#1771)', () => {
     });
   });
 
-  // Enumerated rather than globbed: a `>= 21` count over readdir() passes
-  // even when a supported locale is missing, as long as some other .json
-  // makes up the number. Naming the files means dropping one fails here.
-  const SUPPORTED_LOCALES = [
-    'ar',
-    'de',
-    'en',
-    'es',
-    'fr',
-    'hi',
-    'id',
-    'it',
-    'ja',
-    'ko',
-    'nl',
-    'pl',
-    'pt',
-    'ru',
-    'sv',
-    'th',
-    'tr',
-    'uk',
-    'vi',
-    'zh-CN',
-    'zh-TW',
-  ];
-
   it('every new i18n key added for #1771 exists in all 21 locales', () => {
     const localesDir = path.resolve(__dirname, '../i18n/locales');
     expect(SUPPORTED_LOCALES).toHaveLength(21);
@@ -215,5 +215,97 @@ describe('toastErrorWithReport shutdown handling (#1276)', () => {
   it('still offers Report when there is no status at all', () => {
     toastErrorWithReport('Something broke', new Error('Something broke'));
     expect(typeof toastErrorMock.mock.calls[0][0]).toBe('function');
+  });
+});
+
+// #2160: a not-ready backend is not a fault and must not offer a bug report.
+// Matched on the [starting] MARKER, never on the English phase label the
+// backend interpolates, and never on the bare 503 status — same contract as
+// [shutting_down] (#1276).
+describe('toastErrorWithReport startup handling (#2160)', () => {
+  beforeEach(() => {
+    toastErrorMock.mockClear();
+  });
+
+  const withStatus = (message, status) => {
+    const e = new Error(message);
+    e.name = 'ApiError';
+    e.status = status;
+    return e;
+  };
+
+  const STARTING =
+    '503 Service Unavailable: [starting] VoiceStudio is still starting ' +
+    '(Restoring settings…). Retry shortly.';
+
+  it('shows localized guidance for the reported starting 503, with no Report action', () => {
+    const err = withStatus(STARTING, 503);
+    toastErrorWithReport(err.message, err);
+
+    expect(toastErrorMock).toHaveBeenCalledTimes(1);
+    expect(toastErrorMock).toHaveBeenCalledWith('t:errors.backend_starting', {
+      duration: 8000,
+    });
+  });
+
+  it('matches the marker for other startup phases, not the English label', () => {
+    const err = withStatus(
+      '503 Service Unavailable: [starting] VoiceStudio is still starting ' +
+        '(Loading ML runtime (PyTorch)…). Retry shortly.',
+      503,
+    );
+    toastErrorWithReport(err.message, err);
+    expect(toastErrorMock).toHaveBeenCalledWith('t:errors.backend_starting', {
+      duration: 8000,
+    });
+  });
+
+  it('matches the marker even when only the message string carries it', () => {
+    toastErrorWithReport(`Error: ${STARTING}`, undefined);
+    expect(toastErrorMock).toHaveBeenCalledWith('t:errors.backend_starting', {
+      duration: 8000,
+    });
+  });
+
+  it('still offers Report for a 503 that is a real compute-timeout failure', () => {
+    const err = withStatus(
+      '503 Service Unavailable: TTS generate ran for more than 300s of actual ' +
+        'compute time and was abandoned',
+      503,
+    );
+    toastErrorWithReport(err.message, err);
+    expect(toastErrorMock).toHaveBeenCalledTimes(1);
+    expect(typeof toastErrorMock.mock.calls[0][0]).toBe('function');
+  });
+
+  it('still offers Report for an engine-unavailable 503', () => {
+    const err = withStatus("503 Service Unavailable: TTS engine 'xtts' is unavailable", 503);
+    toastErrorWithReport(err.message, err);
+    expect(typeof toastErrorMock.mock.calls[0][0]).toBe('function');
+  });
+
+  it('still offers Report for a genuine 500', () => {
+    const err = withStatus('500 Internal Server Error: something actually broke', 500);
+    toastErrorWithReport(err.message, err);
+    expect(typeof toastErrorMock.mock.calls[0][0]).toBe('function');
+  });
+
+  it('still offers Report when the message mentions starting without the marker', () => {
+    const err = withStatus(
+      '503 Service Unavailable: VoiceStudio is still starting (Restoring settings…). ' +
+        'Retry shortly.',
+      503,
+    );
+    toastErrorWithReport(err.message, err);
+    expect(typeof toastErrorMock.mock.calls[0][0]).toBe('function');
+  });
+
+  it('errors.backend_starting exists (non-empty) in every locale', () => {
+    const localesDir = path.resolve(__dirname, '../i18n/locales');
+    expect(SUPPORTED_LOCALES).toHaveLength(21);
+    for (const code of SUPPORTED_LOCALES) {
+      const locale = JSON.parse(fs.readFileSync(path.join(localesDir, `${code}.json`), 'utf8'));
+      expect(locale.errors?.backend_starting, `${code} missing the key`).toBeTruthy();
+    }
   });
 });
