@@ -42,6 +42,7 @@ metadata and the backend fallback mirror it. Archived Tauri manifests stay froze
 
 ### Fixed
 
+- A clone that needs automatic reference transcription and has no installed speech-to-text model now returns the transcript or Model Catalogue remedy, instead of an unrecognized error that says to retry (#2320) — thanks @ewh1tman!
 - Signed macOS releases now notarize and staple Electron installers when the owner supplies Apple Developer credentials (#1779)
 - Integration pages show each integration's own category and summary instead of borrowed labels such as "Dubbing" for Twilio (#2304)
 - Clone Import script reads Windows-1252 and BOM-tagged UTF-16 text the same way Stories and Dub paste already do (#2313) — thanks @kevin9327!

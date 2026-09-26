@@ -123,6 +123,12 @@ The env var overrides the persisted UI choice.
 
 ## Troubleshooting
 
+- "Automatic reference transcription needs an installed speech-to-text model":
+  the reference clip has no matching transcript and no speech-to-text model is
+  installed. Provide a transcript of the clip, or install and select a
+  speech-to-text model in **Model Catalogue**, then generate again. Cloning
+  does not download a recognizer for this step. Synthesis reports that
+  validation error directly (HTTP 400) with this remedy.
 - "Too heavy for the available compute" on a small GPU: see the VRAM floor
   above — switch to OmniVoice GGUF or close other GPU apps.
 - First generation is slow: the first call downloads multi-GB weights. To

@@ -189,3 +189,169 @@ def test_the_marker_is_shared_not_duplicated():
 
     assert classify(AUDIO_WRITE_FAILED_MARKER) == "AUDIO_IO_FAILED"
     assert classify(AUDIO_WRITE_FAILED_MARKER.upper()) == "AUDIO_IO_FAILED"
+
+
+# ── #2320: missing reference ASR stays a validation error ────────────────
+
+
+def test_classifier_sentence_is_the_model_diagnostic(monkeypatch):
+    """The owned sentence is OmniVoice._load_cached_reference_asr's, not a
+    paraphrase. A sidecar test that copied a shorter phrase could pass while
+    the real diagnostic still fell through."""
+    from unittest.mock import Mock
+
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
+    from api.routers.generation import _MISSING_REFERENCE_ASR_MESSAGE
+    from omnivoice.models.omnivoice import OmniVoice
+
+    model = OmniVoice.__new__(OmniVoice)
+    monkeypatch.setattr(
+        "huggingface_hub.snapshot_download",
+        Mock(side_effect=LocalEntryNotFoundError("not cached")),
+    )
+    with pytest.raises(ValueError) as raised:
+        model._load_cached_reference_asr()
+    assert str(raised.value) == _MISSING_REFERENCE_ASR_MESSAGE
+    assert type(raised.value.__cause__).__name__ == "LocalEntryNotFoundError"
+
+
+def _reported_sidecar_error(message: str) -> RuntimeError:
+    """The parent keeps the child's ``{type}: {message}`` and drops the cause.
+
+    ``SubprocessBackend`` raises ``RuntimeError(f"{id} sidecar {stage} error:
+    {message}")`` with no ``from``. On MPS the engine id is ``omnivoice``.
+    """
+    return RuntimeError(
+        f"omnivoice sidecar synthesize error: ValueError: {message}"
+    )
+
+
+def test_sidecar_missing_reference_asr_is_validation_not_unrecognized(reraise):
+    """#2320: the reported sidecar RuntimeError must come back as the model's
+    ValueError, with the transcript / Model Catalogue remedy, and without the
+    unrecognized-error retry."""
+    from api.routers import generation as gen
+
+    message = gen._MISSING_REFERENCE_ASR_MESSAGE
+    sidecar = _reported_sidecar_error(message)
+    with pytest.raises(ValueError) as excinfo:
+        reraise(sidecar)
+    msg = str(excinfo.value)
+    assert msg == message
+    assert "reference transcript" in msg
+    assert "Model Catalogue" in msg
+    assert "doesn't recognize" not in msg
+    assert "Retry once" not in msg
+    assert excinfo.value.__cause__ is sidecar
+
+
+def test_direct_missing_reference_asr_keeps_its_message_and_cause(reraise):
+    """A ValueError chained from the cache miss is validation, not a download
+    failure. LocalEntryNotFoundError is otherwise a network signature."""
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
+    from api.routers import generation as gen
+
+    message = gen._MISSING_REFERENCE_ASR_MESSAGE
+    try:
+        raise LocalEntryNotFoundError("not cached")
+    except LocalEntryNotFoundError as exc:
+        try:
+            raise ValueError(message) from exc
+        except ValueError as caught:
+            direct = caught
+    assert any(
+        type(item).__name__ == "LocalEntryNotFoundError"
+        for item in gen._exception_chain(direct)
+    )
+    with pytest.raises(ValueError) as excinfo:
+        reraise(direct)
+    assert str(excinfo.value) == message
+    assert excinfo.value.__cause__ is direct
+    assert "network problem" not in str(excinfo.value)
+    assert "doesn't recognize" not in str(excinfo.value)
+
+
+def test_nested_missing_reference_asr_is_found_by_the_chain_helper(reraise):
+    """A wrapper whose own text says nothing still carries the diagnostic on
+    ``__cause__``. Classification walks ``_exception_chain``."""
+    from api.routers import generation as gen
+
+    message = gen._MISSING_REFERENCE_ASR_MESSAGE
+    try:
+        raise ValueError(message)
+    except ValueError as caught:
+        diagnostic = caught
+        try:
+            raise RuntimeError("engine wrapper") from caught
+        except RuntimeError as outer:
+            nested = outer
+    assert any(
+        isinstance(item, ValueError) and str(item) == message
+        for item in gen._exception_chain(nested)
+    )
+    with pytest.raises(ValueError) as excinfo:
+        reraise(nested)
+    assert str(excinfo.value) == message
+    assert excinfo.value.__cause__ is nested
+    assert diagnostic in list(gen._exception_chain(excinfo.value))
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "ValueError: ASR model is not loaded. Call model.load_asr_model() first.",
+        "speech-to-text model failed to download",
+        "Automatic reference transcription failed: tensor shape mismatch",
+        "install a speech-to-text model in Model Catalogue",
+        "ValueError: the reference model weights are missing",
+    ],
+)
+def test_broad_asr_wording_stays_unrecognized(reraise, raw):
+    """ASR, model, or ValueError alone is not this validation error."""
+    with pytest.raises(RuntimeError) as excinfo:
+        reraise(RuntimeError(raw))
+    msg = str(excinfo.value)
+    # The catch-all quotes the original text, and "reference transcription"
+    # contains the letters "reference transcript", so match the remedy sentence.
+    assert "doesn't recognize" in msg
+    assert "Provide a matching reference transcript" not in msg
+    assert "Retry once" in msg
+
+
+@pytest.mark.parametrize(
+    ("exc", "marker"),
+    [
+        (RuntimeError("CUDA out of memory. Tried to allocate 2 GiB"), "ran out of memory"),
+        (
+            RuntimeError("Cannot send a request, as the client has been closed."),
+            "network problem",
+        ),
+        (TimeoutError(), "time limit"),
+        (
+            RuntimeError(
+                "OMNIVOICE_SHERPA_MODEL not set. Point it to a sherpa-onnx TTS model directory"
+            ),
+            "isn't set up yet",
+        ),
+        (RuntimeError("tensor shape mismatch"), "doesn't recognize"),
+    ],
+)
+def test_existing_failure_classes_ignore_this_validation(reraise, exc, marker):
+    with pytest.raises(RuntimeError) as excinfo:
+        reraise(exc)
+    msg = str(excinfo.value)
+    assert marker in msg
+    assert "reference transcript" not in msg
+
+
+def test_cache_miss_without_the_validation_sentence_stays_a_network_error(reraise):
+    from huggingface_hub.errors import LocalEntryNotFoundError
+
+    with pytest.raises(RuntimeError) as excinfo:
+        reraise(LocalEntryNotFoundError("not cached"))
+    msg = str(excinfo.value)
+    assert "network problem" in msg
+    assert "reference transcript" not in msg
+    assert "doesn't recognize" not in msg

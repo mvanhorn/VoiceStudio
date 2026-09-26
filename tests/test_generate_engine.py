@@ -43,7 +43,7 @@ def _tts_mod():
 
 
 def _make_fake_engine(engine_id="fake-engine", *, available=True, own_mastering=False,
-                      gpu_compat=("cpu",)):
+                      gpu_compat=("cpu",), error=None):
     """Build a fresh TTSBackend stub class. Fresh per call so the per-process
     instance cache in api.routers.engines can't leak state across tests."""
 
@@ -72,6 +72,8 @@ def _make_fake_engine(engine_id="fake-engine", *, available=True, own_mastering=
 
         def generate(self, text, **kw) -> torch.Tensor:
             type(self).calls.append((text, kw))
+            if error is not None:
+                raise error
             return torch.zeros(1, 24000)
 
     return _FakeEngine
@@ -243,3 +245,30 @@ def test_generate_respects_applies_own_mastering(client, monkeypatch, no_omnivoi
     res = client.post("/generate", data={"text": "plain", "engine": "fake-plain"})
     assert res.status_code == 200, res.text
     assert mastering.call_count == 1
+
+
+def test_generate_sidecar_missing_reference_asr_is_400(client, monkeypatch, no_omnivoice_model):
+    """#2320: a sidecar-shaped missing-reference-ASR failure is a validation
+    error. The fake engine's generate() runs inside ``_run_backend_inference``,
+    and the route turns the restored ValueError into HTTP 400."""
+    from api.routers.generation import _MISSING_REFERENCE_ASR_MESSAGE
+
+    sidecar = RuntimeError(
+        "omnivoice sidecar synthesize error: ValueError: "
+        + _MISSING_REFERENCE_ASR_MESSAGE
+    )
+    fake = _make_fake_engine(error=sidecar)
+    monkeypatch.setitem(_tts_mod()._REGISTRY, "fake-engine", fake)
+
+    res = client.post("/generate", data={"text": "Hello engine", "engine": "fake-engine"})
+
+    assert res.status_code == 400, res.text
+    detail = res.json()["detail"]
+    assert isinstance(detail, str)
+    assert detail == _MISSING_REFERENCE_ASR_MESSAGE
+    assert "reference transcript" in detail
+    assert "Model Catalogue" in detail
+    assert "doesn't recognize" not in detail
+    assert "Retry once" not in detail
+    assert "Couldn't synthesize" not in detail
+    assert len(fake.calls) == 1

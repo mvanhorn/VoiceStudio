@@ -677,6 +677,30 @@ def _is_media_process_launch_failure(exc: BaseException) -> bool:
     }
 
 
+# #2320: the sentence OmniVoice._load_cached_reference_asr raises when a clone
+# reference has no transcript and the speech-to-text weights are not already
+# cached. Matched in full so a nearby failure that only mentions ASR, a
+# speech-to-text model, or ValueError is left to its own class.
+_MISSING_REFERENCE_ASR_MESSAGE = (
+    "Automatic reference transcription needs an installed speech-to-text "
+    "model. Provide a matching reference transcript, or install and select "
+    "a speech-to-text model in Model Catalogue, then try again."
+)
+
+
+def _is_missing_reference_asr(e) -> bool:
+    """True when the failure is that owned missing-reference-ASR validation.
+
+    The model raises ``ValueError``. A sidecar serializes it to
+    ``RuntimeError("{id} sidecar {stage} error: ValueError: …")`` and drops
+    the exception type, and other wrappers keep the original as
+    ``__cause__`` or ``__context__``. The sentence is matched in full across
+    :func:`_exception_chain`.
+    """
+    needle = _MISSING_REFERENCE_ASR_MESSAGE.lower()
+    return any(needle in str(exc).lower() for exc in _exception_chain(e))
+
+
 def _oom_friendly_reraise(e):
     """Best-effort cache flush + the user-facing OOM hint shared by both
     inference paths."""
@@ -744,6 +768,15 @@ def _oom_friendly_reraise(e):
             or "conflicting instruct items" in _low
             or "in a single instruct" in _low):
         raise ValueError(es) from e
+    # #2320: missing cached reference ASR is the same kind of validation. The
+    # sidecar stringifies the model's ValueError into a RuntimeError, so the
+    # route's `except ValueError` never sees it and the unrecognized catch-all
+    # tells the user to retry. Re-raise the model's own remedy so /generate
+    # returns 400. This has to run before the network branch: the model chains
+    # the ValueError from LocalEntryNotFoundError, which otherwise means a
+    # download failed.
+    if _is_missing_reference_asr(e):
+        raise ValueError(_MISSING_REFERENCE_ASR_MESSAGE) from e
     # #705: a corrupt or wrong-architecture native component (a .dll / .pyd / .exe
     # — torch, ffmpeg, or a bundled engine binary) fails to load/spawn on Windows
     # with "[WinError 193] %1 is not a valid Win32 application". That is NOT OOM,
