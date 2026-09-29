@@ -5,6 +5,7 @@ Engine availability depends on installed models, hardware, and configured provid
 ## Features
 
 - **Voice Cloning**
+- **Clone from video**
 - **Voice Design**
 - **Video Dubbing**
 - **Dictation Widget**

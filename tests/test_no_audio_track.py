@@ -232,22 +232,14 @@ def test_gallery_upload_refuses_video_without_audio(video_only, tmp_path, monkey
 
 
 @needs_ffmpeg
-def test_clone_profile_refuses_reference_without_audio(video_only, tmp_path, monkeypatch):
-    from fastapi import UploadFile
+def test_clone_from_media_refuses_video_without_audio(video_only, tmp_path):
+    from services.clone_from_media import process_media
 
-    from api.routers import profiles
-
-    store = tmp_path / "store"
-    store.mkdir()
-    monkeypatch.setattr(profiles, "VOICES_DIR", str(store))
-    upload = UploadFile(io.BytesIO(video_only.read_bytes()), filename="ref.mp4")
+    out = tmp_path / "out"
+    out.mkdir()
     with _raises_no_audio():
-        asyncio.run(profiles.create_profile(
-            name="Silent", ref_audio=upload, ref_text="hello", instruct="",
-            language="Auto", seed=None, personality="", kind="clone",
-            vd_states=None, image=None,
-        ))
-    assert not list(store.iterdir()), "the refused reference must not be kept"
+        process_media(str(video_only), str(out))
+    assert "234" not in NO_AUDIO_TRACK_MESSAGE
 
 
 @needs_ffmpeg

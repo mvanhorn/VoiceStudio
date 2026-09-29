@@ -710,6 +710,62 @@ def raise_for_audio_extract_failure(stderr, path: str) -> None:
         raise NoAudioTrackError()
 
 
+def audio_extract_cmd(
+    ffmpeg: str,
+    src: str,
+    dest: str,
+    *,
+    sample_rate: int = 16000,
+    channels: int = 1,
+) -> list[str]:
+    """ffmpeg argv that demuxes an audio stream to 16-bit PCM WAV.
+
+    Shared by Clone, Dub ingest, and Batch so the ``-vn -acodec pcm_s16le``
+    extract cannot drift between call sites.
+    """
+    return [
+        ffmpeg, "-hide_banner", "-nostdin", "-i", src,
+        "-vn", "-acodec", "pcm_s16le",
+        "-ar", str(sample_rate), "-ac", str(channels),
+        dest, "-y",
+    ]
+
+
+def extract_audio_wav(
+    src: str,
+    dest: str,
+    *,
+    sample_rate: int = 16000,
+    channels: int = 1,
+    timeout: float = 300.0,
+) -> str:
+    """Write a PCM WAV of ``src``'s audio track to ``dest``.
+
+    Raises :class:`core.failure.NoAudioTrackError` when the file has no
+    audio stream. Other ffmpeg failures raise ``RuntimeError`` with a short
+    sentence — never the raw stderr dump.
+    """
+    require_audio_stream(src)
+    ffmpeg = find_ffmpeg()
+    if not ffmpeg:
+        raise RuntimeError(
+            "ffmpeg is not available, so this file's audio track cannot be read."
+        )
+    dest_dir = os.path.dirname(dest)
+    if dest_dir:
+        os.makedirs(dest_dir, exist_ok=True)
+    proc = subprocess.run(
+        audio_extract_cmd(
+            ffmpeg, src, dest, sample_rate=sample_rate, channels=channels,
+        ),
+        capture_output=True, timeout=timeout, check=False,
+    )
+    if proc.returncode != 0 or not os.path.isfile(dest) or os.path.getsize(dest) < 64:
+        raise_for_audio_extract_failure(proc.stderr or b"", src)
+        raise RuntimeError("Could not extract audio from that file.")
+    return dest
+
+
 # Windows CreateProcess rejects command lines over 32,767 chars with
 # `[WinError 206] The filename or extension is too long`. The dub-export mux
 # argv scales with track/segment count (per-track -i/-map/-metadata plus the

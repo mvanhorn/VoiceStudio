@@ -1,5 +1,5 @@
 import { LoaderCircleIcon, MicIcon, SparklesIcon, SquareIcon, UploadCloudIcon } from 'lucide-react';
-import { useEffect, useId, useRef, useState, type DragEvent } from 'react';
+import { useEffect, useId, useRef, useState, type DragEvent, type FormEvent } from 'react';
 import { useTranslation } from 'react-i18next';
 import { toast } from 'sonner';
 import { RecordingInputs } from '@/components/recording-inputs';
@@ -9,13 +9,29 @@ import { CLONE_MAX_SECONDS, REF_HARD_MAX_SECONDS } from '@/lib/api/generate';
 import { probeAudioDuration } from '@/lib/audio/probe';
 import { referenceUsageNote } from '@/lib/reference-usage';
 import { setReferenceFile, type SetReferenceResult } from '@/lib/store/reference';
+import { describeError } from '@/lib/api/client';
+import {
+  chooseSpeaker,
+  fetchSpeakerAudio,
+  fromMedia,
+  type FromMediaResponse,
+} from '@/lib/api/profiles';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { SpeakerPicker } from './speaker-picker';
 import { cn } from '@/lib/utils';
 
-const ACCEPT = 'audio/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.webm';
+const ACCEPT = 'audio/*,video/*,.mp3,.wav,.m4a,.flac,.ogg,.aac,.webm,.mp4,.mkv,.mov,.avi';
 const AUDIO_EXT = /\.(mp3|wav|m4a|flac|ogg|aac|webm)$/i;
+const VIDEO_EXT = /\.(mp4|mkv|mov|avi)$/i;
 const LEVEL_THRESHOLD = 0.025;
 
-function isAudioFile(file: File): boolean {
+export function isVideoFile(file: File): boolean {
+  return file.type.startsWith('video/') || VIDEO_EXT.test(file.name);
+}
+
+export function isAudioFile(file: File): boolean {
+  if (isVideoFile(file)) return false;
   return file.type.startsWith('audio/') || AUDIO_EXT.test(file.name);
 }
 
@@ -33,39 +49,93 @@ async function checkClip(file: File): Promise<SetReferenceResult> {
   };
 }
 
-/**
- * Validate + load a reference clip, surfacing the length checks as toasts.
- * Without `onAccept` the clip becomes the composer's reference; with it (the
- * saved-profile editor) the same checks run and the clip is handed back.
- */
 type PickToken = { current: number };
 
-function useIngest(onAccept?: AcceptReference, sharedPick?: PickToken): IngestFn {
+function useIngest(onAccept?: AcceptReference, sharedPick?: PickToken) {
   const { t } = useTranslation();
-  // Monotonic pick token: a slow probe for an earlier clip must never replace
-  // (or toast over) a later one. Zones shown together share one token, so an
-  // upload probe cannot land after a newer recording.
   const ownPick = useRef(0);
   const latestPick = sharedPick ?? ownPick;
-  return async (file) => {
-    if (!file) return;
-    const pick = ++latestPick.current;
-    if (!isAudioFile(file)) {
-      toast.error(t('clone.unsupported_audio'));
-      return;
-    }
+  const [pending, setPending] = useState<FromMediaResponse | null>(null);
+  const [busy, setBusy] = useState(false);
+
+  const acceptClip = async (file: File, pick: number) => {
     const result: SetReferenceResult = onAccept
       ? await checkClip(file)
       : await setReferenceFile(file);
     if (pick !== latestPick.current) return;
     if (onAccept && result.ok) onAccept(file, result.durationSeconds);
-    // An accepted long clip gets ReferenceUsageNote beside it instead: how
-    // much of it the active engine really uses (#2281).
     if (!result.ok) {
       const duration = Math.round(result.durationSeconds ?? 0);
       toast.error(t('tts_errors.too_long', { duration, max: REF_HARD_MAX_SECONDS }));
     }
   };
+
+  const finishMedia = async (media: FromMediaResponse, speakerId: string, pick: number) => {
+    const wav = await fetchSpeakerAudio(media.media_id, speakerId);
+    await chooseSpeaker(media.media_id, speakerId);
+    if (pick !== latestPick.current) return;
+    setPending(null);
+    await acceptClip(wav, pick);
+  };
+
+  const ingestMedia = async (source: { file?: File; url?: string }) => {
+    const pick = ++latestPick.current;
+    setBusy(true);
+    setPending(null);
+    try {
+      const media = await fromMedia(source);
+      if (pick !== latestPick.current) return;
+      if (media.isolation === 'skipped') toast.warning(t('clone.isolation_skipped'));
+      if (media.warning) toast.warning(t('clone.diarisation_skipped'));
+      if (media.speakers.length <= 1) {
+        const speaker = media.speakers[0];
+        if (!speaker) return;
+        await finishMedia(media, speaker.id, pick);
+        return;
+      }
+      setPending(media);
+    } catch (err) {
+      if (pick !== latestPick.current) return;
+      toast.error(describeError(err));
+    } finally {
+      if (pick === latestPick.current) setBusy(false);
+    }
+  };
+
+  const ingestFile: IngestFn = async (file) => {
+    if (!file) return;
+    if (isVideoFile(file)) {
+      await ingestMedia({ file });
+      return;
+    }
+    const pick = ++latestPick.current;
+    if (!isAudioFile(file)) {
+      toast.error(t('clone.unsupported_media'));
+      return;
+    }
+    await acceptClip(file, pick);
+  };
+
+  const ingestUrl = async (url: string) => {
+    const href = url.trim();
+    if (!href) return;
+    await ingestMedia({ url: href });
+  };
+
+  const pickSpeaker = async (speakerId: string) => {
+    if (!pending) return;
+    const pick = latestPick.current;
+    setBusy(true);
+    try {
+      await finishMedia(pending, speakerId, pick);
+    } catch (err) {
+      toast.error(describeError(err));
+    } finally {
+      setBusy(false);
+    }
+  };
+
+  return { ingestFile, ingestUrl, pickSpeaker, pending, busy };
 }
 
 /** How much of a clip longer than the 5–15 s recommendation the active engine uses. */
@@ -90,19 +160,37 @@ export function UploadZone({
   pickToken,
 }: { onAccept?: AcceptReference; pickToken?: PickToken } = {}) {
   const { t } = useTranslation();
-  const ingestFile = useIngest(onAccept, pickToken);
+  const ingest = useIngest(onAccept, pickToken);
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [url, setUrl] = useState('');
   const id = useId();
 
   const onDrop = (event: DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     setDragging(false);
-    void ingestFile(event.dataTransfer.files[0] ?? null);
+    void ingest.ingestFile(event.dataTransfer.files[0] ?? null);
   };
 
+  const onUrl = (event: FormEvent) => {
+    event.preventDefault();
+    void ingest.ingestUrl(url);
+  };
+
+  if (ingest.pending) {
+    return (
+      <SpeakerPicker
+        speakers={ingest.pending.speakers}
+        onPick={(speakerId) => void ingest.pickSpeaker(speakerId)}
+        isolationSkipped={ingest.pending.isolation === 'skipped'}
+        diarisationSkipped={Boolean(ingest.pending.warning)}
+        busy={ingest.busy}
+      />
+    );
+  }
+
   return (
-    <div>
+    <div className="flex flex-col gap-3">
       <input
         ref={inputRef}
         id={id}
@@ -110,7 +198,7 @@ export function UploadZone({
         accept={ACCEPT}
         className="sr-only"
         onChange={(event) => {
-          void ingestFile(event.target.files?.[0] ?? null);
+          void ingest.ingestFile(event.target.files?.[0] ?? null);
           event.target.value = '';
         }}
       />
@@ -127,11 +215,28 @@ export function UploadZone({
         onDragLeave={() => setDragging(false)}
         onDrop={onDrop}
       >
-        <UploadCloudIcon className="size-6 text-muted-foreground" aria-hidden="true" />
+        {ingest.busy ? (
+          <LoaderCircleIcon className="size-6 animate-spin text-muted-foreground motion-reduce:animate-none" />
+        ) : (
+          <UploadCloudIcon className="size-6 text-muted-foreground" aria-hidden="true" />
+        )}
         <span className="text-[length:var(--text-label)] font-medium text-muted-foreground">
           {t('clone.drop_audio')}
         </span>
       </label>
+      <form className="flex gap-2" onSubmit={onUrl}>
+        <Input
+          type="url"
+          value={url}
+          onChange={(event) => setUrl(event.target.value)}
+          placeholder={t('clone.from_url_placeholder')}
+          aria-label={t('clone.from_url_placeholder')}
+          disabled={ingest.busy}
+        />
+        <Button type="submit" size="sm" disabled={ingest.busy || !url.trim()}>
+          {t('dub.ingest')}
+        </Button>
+      </form>
     </div>
   );
 }
@@ -141,8 +246,8 @@ export function RecordZone({
   pickToken,
 }: { onAccept?: AcceptReference; pickToken?: PickToken } = {}) {
   const { t } = useTranslation();
-  const ingestFile = useIngest(onAccept, pickToken);
-  const rec = useRecording((file) => void ingestFile(file));
+  const ingest = useIngest(onAccept, pickToken);
+  const rec = useRecording((file) => void ingest.ingestFile(file));
   const hasSignal = rec.level >= LEVEL_THRESHOLD;
   let micButton;
   if (rec.isStarting || rec.isCleaning) {
@@ -236,8 +341,6 @@ export function RecordZone({
  */
 export function ReferenceSourcePicker({ onAccept }: { onAccept?: AcceptReference } = {}) {
   const pickToken = useRef(0);
-  // Leaving the picker (a clip was accepted, or the user cancelled) retires
-  // every probe still running, so none can replace the choice afterwards.
   useEffect(() => {
     const token = pickToken;
     return () => {

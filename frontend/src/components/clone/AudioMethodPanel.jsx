@@ -6,14 +6,21 @@ import VoiceSelect from './VoiceSelect';
 import MicButton from './MicButton';
 import WaveformPlayer from '../WaveformPlayer';
 import VoiceModeIcon from './VoiceModeIcon';
+import { API } from '../../api/client';
+import { chooseSpeaker, fetchSpeakerAudio, fromMedia } from '../../api/profiles';
 
 const EMPTY_LEVEL_STORE = {
   getSnapshot: () => 0,
   subscribe: () => () => {},
 };
 
+const isVideoFile = (file) =>
+  file && (file.type.startsWith('video/') || /\.(mp4|mkv|mov|avi)$/i.test(file.name));
+
 const isAudioFile = (file) =>
-  file && (file.type.startsWith('audio/') || /\.(mp3|wav|m4a|flac|ogg|aac|webm)$/i.test(file.name));
+  file &&
+  !isVideoFile(file) &&
+  (file.type.startsWith('audio/') || /\.(mp3|wav|m4a|flac|ogg|aac|webm)$/i.test(file.name));
 
 export default function AudioMethodPanel({
   t,
@@ -47,15 +54,48 @@ export default function AudioMethodPanel({
   const [sourceMode, setSourceMode] = useState(
     isStartingRecording || isRecording ? 'record' : 'upload',
   );
+  const [mediaUrl, setMediaUrl] = useState('');
+  const [pendingMedia, setPendingMedia] = useState(null);
+  const [busy, setBusy] = useState(false);
   const inputLevel = useSyncExternalStore(inputLevelStore.subscribe, inputLevelStore.getSnapshot);
   const hasReference = Boolean(refAudio || selectedProfile);
 
+  const acceptSpeaker = async (media, speakerId) => {
+    const wav = await fetchSpeakerAudio(media.media_id, speakerId);
+    await chooseSpeaker(media.media_id, speakerId);
+    ingestRefAudio(wav);
+    setPendingMedia(null);
+  };
+
+  const ingestMedia = async (source) => {
+    setBusy(true);
+    try {
+      const media = await fromMedia(source);
+      if (media.isolation === 'skipped') toast(t('clone.isolation_skipped'));
+      if (media.warning) toast(t('clone.diarisation_skipped'));
+      if ((media.speakers || []).length <= 1) {
+        const speaker = media.speakers?.[0];
+        if (speaker) await acceptSpeaker(media, speaker.id);
+        return;
+      }
+      setPendingMedia(media);
+    } catch (err) {
+      toast.error(err?.message || t('clone.unsupported_media'));
+    } finally {
+      setBusy(false);
+    }
+  };
+
   const ingestFile = (file) => {
+    if (isVideoFile(file)) {
+      void ingestMedia({ file });
+      return;
+    }
     if (isAudioFile(file)) {
       ingestRefAudio(file);
       return;
     }
-    if (file) toast.error(t('clone.unsupported_audio'));
+    if (file) toast.error(t('clone.unsupported_media'));
   };
 
   return (
@@ -100,11 +140,68 @@ export default function AudioMethodPanel({
         )}
       </div>
 
-      {!hasReference && sourceMode === 'upload' && (
-        <div className="flex flex-1 flex-col min-h-32">
+      {!hasReference && sourceMode === 'upload' && pendingMedia && (
+        <div className="flex flex-col gap-2" role="group" aria-label={t('clone.speakers_title')}>
+          <div className="text-[length:var(--text-sm)] font-medium">
+            {t('clone.speakers_title')}
+          </div>
+          {pendingMedia.isolation === 'skipped' && (
+            <p className="text-[length:var(--text-xs)] text-fg-muted">
+              {t('clone.isolation_skipped')}
+            </p>
+          )}
+          {pendingMedia.warning && (
+            <p className="text-[length:var(--text-xs)] text-fg-muted">
+              {t('clone.diarisation_skipped')}
+            </p>
+          )}
+          <ul className="flex flex-col gap-2">
+            {pendingMedia.speakers.map((speaker) => (
+              <li
+                key={speaker.id}
+                className="flex flex-col gap-2 rounded-lg bg-[var(--chrome-hover-bg)] p-3"
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="min-w-0">
+                    <div className="truncate text-[length:var(--text-sm)] font-medium">
+                      {speaker.id}
+                    </div>
+                    <div className="text-[length:var(--text-xs)] text-fg-muted">
+                      {Math.round(speaker.duration)}s
+                    </div>
+                  </div>
+                  <audio
+                    controls
+                    src={`${API}${speaker.audio_url}`}
+                    aria-label={t('clone.speakers_play')}
+                    className="h-8 max-w-40"
+                  />
+                </div>
+                {speaker.ref_text ? (
+                  <p className="line-clamp-2 text-[length:var(--text-xs)] text-fg-muted">
+                    {speaker.ref_text}
+                  </p>
+                ) : null}
+                <Button
+                  variant="subtle"
+                  size="sm"
+                  disabled={busy}
+                  aria-label={t('clone.speakers_pick')}
+                  onClick={() => void acceptSpeaker(pendingMedia, speaker.id)}
+                >
+                  {t('clone.speakers_pick')}
+                </Button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+
+      {!hasReference && sourceMode === 'upload' && !pendingMedia && (
+        <div className="flex flex-1 flex-col min-h-32 gap-2">
           <input
             type="file"
-            accept="audio/*,.mp3,.wav,.m4a,.flac,.ogg"
+            accept="audio/*,video/*,.mp3,.wav,.m4a,.flac,.ogg,.webm,.mp4,.mkv,.mov,.avi"
             onChange={(event) => {
               ingestFile(event.target.files[0]);
               event.target.value = '';
@@ -131,6 +228,26 @@ export default function AudioMethodPanel({
               {t('clone.drop_audio')}
             </span>
           </label>
+          <form
+            className="flex gap-2"
+            onSubmit={(event) => {
+              event.preventDefault();
+              if (mediaUrl.trim()) void ingestMedia({ url: mediaUrl.trim() });
+            }}
+          >
+            <Input
+              size="sm"
+              type="url"
+              value={mediaUrl}
+              onChange={(event) => setMediaUrl(event.target.value)}
+              placeholder={t('clone.from_url_placeholder')}
+              aria-label={t('clone.from_url_placeholder')}
+              disabled={busy}
+            />
+            <Button type="submit" variant="subtle" size="sm" disabled={busy || !mediaUrl.trim()}>
+              {t('dub.ingest')}
+            </Button>
+          </form>
         </div>
       )}
 

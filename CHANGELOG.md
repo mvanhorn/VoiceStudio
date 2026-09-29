@@ -22,6 +22,7 @@ metadata and the backend fallback mirror it. Archived Tauri manifests stay froze
 
 ### Added
 
+- Clone workspace accepts a video or a page URL, extracts the soundtrack on this machine, and lets you pick which speaker to clone — thanks @mvanhorn!
 - Call agent backend: place or answer phone calls that hold a task conversation in your verified or designed voice, with an editable AI disclosure, take-over and an after-call summary (#2306)
 - Calls workspace with a live transcript, take-over, hang-up and an after-call summary (#2305)
 - Create Story from a dub: its speakers become characters, its segments become lines, and each character keeps the voice the dub assigned — no retyping the script (#2300) — thanks @shivsin25!

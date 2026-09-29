@@ -47,6 +47,7 @@ from fastapi import HTTPException
 from services.ffmpeg_utils import (
     _get_semaphore,
     _spawn_with_retry,
+    audio_extract_cmd,
     find_ffmpeg,
     find_ffprobe,
     raise_for_audio_extract_failure,
@@ -1348,10 +1349,11 @@ async def ingest_pipeline(
             # Name that instead of letting ffmpeg fail with exit 234 and a
             # stream dump ending in "Invalid argument".
             await asyncio.to_thread(require_audio_stream, video_path)
-            p, _, stderr = await run_proc([
-                ffmpeg, "-i", video_path, "-vn", "-acodec", "pcm_s16le",
-                "-ar", "16000", "-ac", "1", audio_path, "-y",
-            ])
+            p, _, stderr = await run_proc(
+                audio_extract_cmd(
+                    ffmpeg, video_path, audio_path, sample_rate=16000, channels=1,
+                )
+            )
             if p.returncode != 0:
                 # The probe can be undetermined (no ffprobe); recognize the
                 # same cause from ffmpeg's own wording.
@@ -1370,10 +1372,12 @@ async def ingest_pipeline(
             # ASR file, which is exactly the old behavior.
             audio_hq_path = os.path.join(job_dir, "audio_hq.wav")
             try:
-                p_hq, _, stderr_hq = await run_proc([
-                    ffmpeg, "-i", video_path, "-vn", "-acodec", "pcm_s16le",
-                    "-ar", "44100", "-ac", "2", audio_hq_path, "-y",
-                ])
+                p_hq, _, stderr_hq = await run_proc(
+                    audio_extract_cmd(
+                        ffmpeg, video_path, audio_hq_path,
+                        sample_rate=44100, channels=2,
+                    )
+                )
                 if p_hq.returncode != 0 or not os.path.exists(audio_hq_path):
                     logger.warning(
                         "HQ audio extraction failed (rc=%s) — separation falls "

@@ -6,14 +6,16 @@ import re
 import uuid
 import weakref
 import time
+import threading
 import shutil
 from typing import Optional
-from fastapi import APIRouter, File, Form, UploadFile, HTTPException
+from fastapi import APIRouter, File, Form, UploadFile, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 
+from api.schemas import ChooseCloneSpeakerRequest
 from core.db import db_conn
-from core.config import VOICES_DIR, OUTPUTS_DIR
+from core.config import VOICES_DIR, OUTPUTS_DIR, DATA_DIR
 from core import event_bus
 from core.personalities import get_personalities
 from omnivoice.utils.voice_design import heal_design_instruct, sanitize_instruct
@@ -83,6 +85,229 @@ def list_profiles():
     with db_conn() as conn:
         rows = conn.execute("SELECT * FROM voice_profiles ORDER BY created_at DESC").fetchall()
     return [_profile_record(r) for r in rows]
+
+
+# Scratch clips for clone-from-video. Files live under DATA_DIR/clone_media
+# and are deleted on choose, failure, or a 30-minute TTL.
+_FROM_MEDIA_TTL_S = 30 * 60
+_FROM_MEDIA_MAX_BYTES = 1024 * 1024 * 1024
+_FROM_MEDIA_EXTS = {
+    ".wav", ".mp3", ".m4a", ".flac", ".ogg", ".oga", ".opus", ".aac", ".webm",
+    ".mp4", ".mkv", ".mov", ".avi",
+}
+_MEDIA_ID_RE = re.compile(r"[a-f0-9]{32}")
+_SPEAKER_ID_RE = re.compile(r"[A-Za-z0-9_]{1,64}")
+_media_sessions: dict[str, dict] = {}
+_media_lock = threading.Lock()
+
+
+def _clone_media_root() -> str:
+    root = os.path.join(DATA_DIR, "clone_media")
+    os.makedirs(root, exist_ok=True)
+    return root
+
+
+def _expire_media_session(media_id: str) -> None:
+    from core.path_security import UnsafePath, resolve_within
+
+    sess = _media_sessions.pop(media_id, None)
+    if not sess:
+        return
+    try:
+        path = resolve_within(_clone_media_root(), media_id)
+    except UnsafePath:
+        return
+    shutil.rmtree(str(path), ignore_errors=True)
+
+
+def _sweep_media_sessions() -> None:
+    now = time.time()
+    dead = [
+        mid for mid, sess in _media_sessions.items()
+        if now - float(sess.get("created_at") or 0) > _FROM_MEDIA_TTL_S
+    ]
+    for mid in dead:
+        _expire_media_session(mid)
+
+
+def _get_media_session(media_id: str) -> dict:
+    _sweep_media_sessions()
+    if not _MEDIA_ID_RE.fullmatch(media_id or ""):
+        raise HTTPException(status_code=404, detail="That clip is no longer available.")
+    sess = _media_sessions.get(media_id)
+    if not sess:
+        raise HTTPException(status_code=404, detail="That clip is no longer available.")
+    return sess
+
+
+def _speaker_audio_url(media_id: str, speaker_id: str) -> str:
+    return f"/profiles/from-media/{media_id}/audio/{speaker_id}"
+
+
+@router.post("/profiles/from-media")
+async def create_from_media(
+    request: Request,
+    file: Optional[UploadFile] = File(None),
+    url: Optional[str] = Form(None),
+):
+    """Extract a clone reference from a local video/audio file or a page URL."""
+    from api.dependencies import require_native_access
+    from core.path_security import UnsafePath, resolve_within, safe_filename
+    from api.schemas import CloneFromMediaResponse, CloneFromMediaSpeaker
+    from services.clone_from_media import process_media
+
+    has_url = bool((url or "").strip())
+    filename = (file.filename or "") if file is not None else ""
+    has_file = bool(filename) or (
+        file is not None and getattr(file, "size", None)
+    )
+    # UploadFile.filename is empty when the client omitted the file part.
+    if file is not None and not filename and not has_url:
+        has_file = False
+    if has_file == has_url:
+        raise HTTPException(
+            status_code=400,
+            detail="Send a media file or a URL, not both.",
+        )
+    if has_url:
+        require_native_access(request)
+        href = url.strip()
+        if not (href.startswith("http://") or href.startswith("https://")):
+            raise HTTPException(
+                status_code=400,
+                detail="URL must start with http:// or https://.",
+            )
+
+    _sweep_media_sessions()
+    media_id = uuid.uuid4().hex
+    try:
+        work_dir = str(resolve_within(_clone_media_root(), media_id))
+    except UnsafePath:
+        raise HTTPException(status_code=400, detail="Could not prepare a working folder.")
+    os.makedirs(work_dir, exist_ok=True)
+    src_path = None
+    try:
+        if has_url:
+            src_path = await asyncio.to_thread(
+                _download_clone_media_url, href, work_dir,
+            )
+        else:
+            ext = os.path.splitext(filename)[1].lower()
+            if ext not in _FROM_MEDIA_EXTS:
+                raise HTTPException(
+                    status_code=415,
+                    detail=(
+                        "Choose a supported audio or video file: WAV, MP3, M4A, "
+                        "FLAC, OGG, AAC, WebM, MP4, MKV, MOV, or AVI."
+                    ),
+                )
+            try:
+                src_name = safe_filename(f"source{ext}")
+            except UnsafePath as exc:
+                raise HTTPException(status_code=400, detail="Invalid filename.") from exc
+            src_path = str(resolve_within(work_dir, src_name))
+            written = 0
+            with open(src_path, "wb") as out:
+                while chunk := await file.read(1024 * 1024):
+                    written += len(chunk)
+                    if written > _FROM_MEDIA_MAX_BYTES:
+                        raise HTTPException(
+                            status_code=413,
+                            detail="That file is too large to clone from. Trim the clip and try again.",
+                        )
+                    out.write(chunk)
+            if written < 64:
+                raise HTTPException(
+                    status_code=422,
+                    detail="That file is empty or too short to clone from.",
+                )
+
+        result = await asyncio.to_thread(process_media, src_path, work_dir)
+        speakers = []
+        stored = {}
+        for item in result["speakers"]:
+            sid = item["id"]
+            if not _SPEAKER_ID_RE.fullmatch(sid):
+                continue
+            stored[sid] = item
+            speakers.append(CloneFromMediaSpeaker(
+                id=sid,
+                duration=item["duration"],
+                ref_text=item.get("ref_text") or "",
+                audio_url=_speaker_audio_url(media_id, sid),
+            ))
+        if not speakers:
+            raise HTTPException(
+                status_code=422,
+                detail="No usable speech was found in that file.",
+            )
+        with _media_lock:
+            _media_sessions[media_id] = {
+                "created_at": time.time(),
+                "dir": work_dir,
+                "speakers": stored,
+                "isolation": result.get("isolation"),
+                "warning": result.get("warning"),
+            }
+        return CloneFromMediaResponse(
+            media_id=media_id,
+            isolation=result.get("isolation") or "skipped",
+            speakers=speakers,
+            warning=result.get("warning"),
+        )
+    except HTTPException:
+        shutil.rmtree(work_dir, ignore_errors=True)
+        raise
+    except Exception:
+        shutil.rmtree(work_dir, ignore_errors=True)
+        raise
+
+
+def _download_clone_media_url(url: str, work_dir: str) -> str:
+    from services.dub_pipeline import yt_download_sync
+
+    video_path, _title, _subs = yt_download_sync(url, work_dir, fetch_subs=False)
+    return video_path
+
+
+@router.get("/profiles/from-media/{media_id}/audio/{speaker_id}")
+def get_from_media_audio(media_id: str, speaker_id: str):
+    from core.path_security import UnsafePath, resolve_within
+
+    if not _SPEAKER_ID_RE.fullmatch(speaker_id or ""):
+        raise HTTPException(status_code=404, detail="That speaker is not in this clip.")
+    with _media_lock:
+        sess = _get_media_session(media_id)
+        item = sess["speakers"].get(speaker_id)
+    if not item:
+        raise HTTPException(status_code=404, detail="That speaker is not in this clip.")
+    try:
+        root = resolve_within(_clone_media_root(), media_id)
+        path = resolve_within(root, os.path.basename(item["path"]))
+    except UnsafePath as exc:
+        raise HTTPException(status_code=404, detail="That speaker is not in this clip.") from exc
+    if not path.is_file():
+        raise HTTPException(status_code=404, detail="That speaker is not in this clip.")
+    return FileResponse(str(path), media_type="audio/wav")
+
+
+@router.post("/profiles/from-media/{media_id}/choose")
+def choose_from_media_speaker(media_id: str, body: ChooseCloneSpeakerRequest):
+    if not _SPEAKER_ID_RE.fullmatch(body.speaker_id or ""):
+        raise HTTPException(status_code=404, detail="That speaker is not in this clip.")
+    with _media_lock:
+        sess = _get_media_session(media_id)
+        item = sess["speakers"].get(body.speaker_id)
+        if not item:
+            raise HTTPException(status_code=404, detail="That speaker is not in this clip.")
+        chosen = {
+            "speaker_id": body.speaker_id,
+            "duration": item["duration"],
+            "ref_text": item.get("ref_text") or "",
+        }
+        _expire_media_session(media_id)
+    return chosen
+
 
 _DESIGN_SEED = 42  # deterministic sample render, same as archetype previews
 
@@ -163,7 +388,12 @@ async def create_profile(
     portrait_path = os.path.join(VOICES_DIR, f"{profile_id}.portrait.jpg")
 
     if kind == "clone":
-        ext = os.path.splitext(ref_audio.filename or ".wav")[1]
+        ext = os.path.splitext(ref_audio.filename or ".wav")[1].lower() or ".wav"
+        if ext not in _REF_AUDIO_EXTS:
+            raise HTTPException(
+                status_code=415,
+                detail="Choose a supported audio file: WAV, MP3, M4A, FLAC, OGG, Opus, AAC, or WebM.",
+            )
         audio_filename = f"{profile_id}{ext}"
         audio_path = os.path.join(VOICES_DIR, audio_filename)
         # Storage can be removed after startup; recover before persisting uploads.

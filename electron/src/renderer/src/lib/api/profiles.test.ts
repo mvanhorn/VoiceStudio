@@ -1,7 +1,13 @@
 ﻿import { afterEach, expect, it, vi } from 'vitest';
-const mock = vi.hoisted(() => ({ json: vi.fn() }));
-vi.mock('./client', () => ({ apiJson: mock.json, apiFetch: vi.fn() }));
-import { createCloneProfile, replaceProfileAudio, updateProfileImage } from './profiles';
+const mock = vi.hoisted(() => ({ json: vi.fn(), fetch: vi.fn() }));
+vi.mock('./client', () => ({ apiJson: mock.json, apiFetch: mock.fetch }));
+import {
+  chooseSpeaker,
+  createCloneProfile,
+  fromMedia,
+  replaceProfileAudio,
+  updateProfileImage,
+} from './profiles';
 afterEach(() => vi.clearAllMocks());
 it('preserves take seed zero and full transcript while sanitizing style', async () => {
   mock.json.mockResolvedValue({});
@@ -74,4 +80,29 @@ it('sends profile edits with the clip so they save atomically', async () => {
   expect(form.get('instruct')).toBe('male');
   expect(form.get('language')).toBe('French');
   expect(form.get('personality')).toBeNull();
+});
+
+it('posts a file to from-media as multipart', async () => {
+  mock.json.mockResolvedValue({ media_id: 'm1', isolation: 'skipped', speakers: [] });
+  const clip = new File(['video'], 'talk.mp4', { type: 'video/mp4' });
+  await fromMedia({ file: clip });
+  expect(mock.json).toHaveBeenCalledWith(
+    '/profiles/from-media',
+    expect.objectContaining({ method: 'POST' }),
+  );
+  const form = mock.json.mock.calls[0][1].body as FormData;
+  expect((form.get('file') as File).name).toBe('talk.mp4');
+  expect(form.get('url')).toBeNull();
+});
+
+it('chooses a speaker with a JSON body', async () => {
+  mock.json.mockResolvedValue({ speaker_id: 'mix' });
+  await chooseSpeaker('aabbcc', 'mix');
+  expect(mock.json).toHaveBeenCalledWith(
+    '/profiles/from-media/aabbcc/choose',
+    expect.objectContaining({
+      method: 'POST',
+      body: JSON.stringify({ speaker_id: 'mix' }),
+    }),
+  );
 });

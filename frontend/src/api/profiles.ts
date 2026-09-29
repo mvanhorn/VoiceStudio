@@ -46,6 +46,44 @@ export async function unlockProfile(id: string): Promise<unknown> {
   return apiPost(`/profiles/${id}/unlock`);
 }
 
+export interface CloneSpeaker {
+  id: string;
+  duration: number;
+  ref_text: string;
+  audio_url: string;
+}
+
+export interface FromMediaResponse {
+  media_id: string;
+  isolation: string;
+  speakers: CloneSpeaker[];
+  warning?: string | null;
+}
+
+export async function fromMedia(input: { file?: File; url?: string }): Promise<FromMediaResponse> {
+  const form = new FormData();
+  if (input.file) form.append('file', input.file, input.file.name);
+  if (input.url) form.append('url', input.url);
+  return apiPost<FromMediaResponse>('/profiles/from-media', form);
+}
+
+export async function chooseSpeaker(
+  mediaId: string,
+  speakerId: string,
+): Promise<{ speaker_id: string; duration: number; ref_text: string }> {
+  return apiPost(`/profiles/from-media/${encodeURIComponent(mediaId)}/choose`, {
+    speaker_id: speakerId,
+  });
+}
+
+export async function fetchSpeakerAudio(mediaId: string, speakerId: string): Promise<File> {
+  const res = await apiFetch(
+    `/profiles/from-media/${encodeURIComponent(mediaId)}/audio/${encodeURIComponent(speakerId)}`,
+  );
+  const blob = await res.blob();
+  return new File([blob], `${speakerId}.wav`, { type: 'audio/wav' });
+}
+
 // ── Portable persona bundles (.ovsvoice, #29) ──────────────────────────────
 
 /** Build + download a .ovsvoice persona bundle. Returns the ZIP blob. */

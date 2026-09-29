@@ -224,6 +224,27 @@ class ModelEntry(BaseModel):
 
 # ── Effect presets ─────────────────────────────────────────────────────
 
+class CloneFromMediaSpeaker(BaseModel):
+    """One speaker clip produced by POST /profiles/from-media."""
+    id: str
+    duration: float
+    ref_text: str = ""
+    audio_url: str
+
+
+class CloneFromMediaResponse(BaseModel):
+    """POST /profiles/from-media"""
+    media_id: str
+    isolation: str
+    speakers: list[CloneFromMediaSpeaker] = Field(default_factory=list)
+    warning: str | None = None
+
+
+class ChooseCloneSpeakerRequest(BaseModel):
+    """POST /profiles/from-media/{media_id}/choose"""
+    speaker_id: str
+
+
 class EffectPresetEntry(BaseModel):
     """One DSP effect preset."""
     model_config = ConfigDict(extra="allow")

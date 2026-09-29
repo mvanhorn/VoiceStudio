@@ -79,8 +79,33 @@ def _sniff_audio_ext(raw: bytes) -> str:
         # a leading non-ftyp box (rare, spec-legal) falls through to the .wav
         # default, which downstream decoders sniff by content anyway — the
         # extension is a storage nicety, not a correctness gate (CR, #1198).
-        return ".m4a"
+        brand = raw[8:12] if len(raw) >= 12 else b""
+        if brand in (b"M4A ", b"M4B "):
+            return ".m4a"
+        return ".mp4"
+    if raw.startswith(b"\x1a\x45\xdf\xa3"):
+        return ".webm"
+    if raw[:4] == b"RIFF" and raw[8:12] == b"AVI ":
+        return ".avi"
     return ".wav"
+
+
+_VIDEO_EXTS = {".mp4", ".mkv", ".mov", ".webm", ".avi"}
+_AUDIO_ONLY_BRANDS = {b"M4A ", b"M4B "}
+
+
+def _is_video_media(name: str | None, raw: bytes) -> bool:
+    """True when the clip is a video container that must go through from-media."""
+    ext = os.path.splitext(name or "")[1].lower()
+    if ext in _VIDEO_EXTS:
+        return True
+    if len(raw) >= 12 and raw[4:8] == b"ftyp":
+        return raw[8:12] not in _AUDIO_ONLY_BRANDS
+    if raw.startswith(b"\x1a\x45\xdf\xa3"):
+        return True
+    if raw[:4] == b"RIFF" and raw[8:12] == b"AVI ":
+        return True
+    return False
 
 
 # ── Output mode + the base path boundary ─────────────────────────────────
@@ -682,12 +707,16 @@ def create_mcp_server(app=None):
         instruct: str = "",
         language: str = "Auto",
         ref_audio_path: str | None = None,
+        speaker_id: str | None = None,
     ) -> str:
-        """Clone a new voice profile from a reference audio sample.
+        """Clone a new voice profile from a reference audio or video sample.
 
         The new voice is immediately available for use with generate_speech
         (pass the returned profile_id as the profile_id argument). Pass
-        exactly one of ref_audio_base64 or ref_audio_path.
+        exactly one of ref_audio_base64 or ref_audio_path. A video under
+        OMNIVOICE_MCP_BASE_PATH is split locally first; if several speakers
+        are found, the tool returns their ids and creates no profile until
+        you retry with speaker_id.
 
         Args:
             name: A human-friendly name for the cloned voice.
@@ -698,10 +727,12 @@ def create_mcp_server(app=None):
                 quality for some engines).
             instruct: Optional style instruction (e.g. 'whisper', 'excited').
             language: Language of the reference audio (ISO code or 'Auto').
-            ref_audio_path: Path to the reference audio under
+            ref_audio_path: Path to the reference audio or video under
                 OMNIVOICE_MCP_BASE_PATH (relative to it, or absolute inside
                 it); refused when no base path is configured. Prefer this
                 lane for LLM agents - the clip never enters the context.
+            speaker_id: When the clip has several speakers, the id returned
+                by the previous call to clone for the speaker to keep.
 
         Returns:
             JSON with the new profile's id, name, and kind.
@@ -712,8 +743,66 @@ def create_mcp_server(app=None):
         )
         if err:
             return json.dumps({"error": err})
+        source_name = os.path.basename(ref_audio_path) if ref_audio_path else (
+            f"ref{_sniff_audio_ext(raw)}"
+        )
         import httpx
         try:
+            if _is_video_media(source_name, raw):
+                media_name = os.path.basename(ref_audio_path) if ref_audio_path else (
+                    f"ref{_sniff_audio_ext(raw)}"
+                )
+                posted = await _api_post_form(
+                    "/profiles/from-media",
+                    data={},
+                    files={"file": (media_name, raw, "application/octet-stream")},
+                )
+                payload = posted.json()
+                speakers = payload.get("speakers") or []
+                chosen_id = (speaker_id or "").strip()
+                if len(speakers) > 1 and not chosen_id:
+                    return json.dumps({
+                        "error": (
+                            "This clip has several speakers. Retry clone_voice "
+                            "with speaker_id set to one of the ids."
+                        ),
+                        "speakers": [
+                            {
+                                "id": s.get("id"),
+                                "duration": s.get("duration"),
+                                "ref_text": s.get("ref_text") or "",
+                            }
+                            for s in speakers if s.get("id")
+                        ],
+                    })
+                if not speakers:
+                    return json.dumps({"error": "No usable speech was found in that file."})
+                if chosen_id:
+                    match = next((s for s in speakers if s.get("id") == chosen_id), None)
+                    if match is None:
+                        return json.dumps({
+                            "error": f"unknown speaker_id {chosen_id!r}",
+                            "speakers": [{"id": s.get("id")} for s in speakers if s.get("id")],
+                        })
+                    pick = match
+                else:
+                    pick = speakers[0]
+                media_id = payload["media_id"]
+                audio_path = pick.get("audio_url") or (
+                    f"/profiles/from-media/{media_id}/audio/{pick['id']}"
+                )
+                async with _client(_post_timeout_s()) as c:
+                    wav_resp = await c.get(audio_path)
+                    wav_resp.raise_for_status()
+                    wav_bytes = wav_resp.content
+                    chosen = await c.post(
+                        f"/profiles/from-media/{media_id}/choose",
+                        json={"speaker_id": pick["id"]},
+                    )
+                    chosen.raise_for_status()
+                raw = wav_bytes
+                if not ref_text:
+                    ref_text = pick.get("ref_text") or ""
             r = await _api_post_form(
                 "/profiles",
                 data={

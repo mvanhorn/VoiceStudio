@@ -286,27 +286,17 @@ async def _run_batch_pipeline(job_id: str, job: dict):
 
     from services.ffmpeg_utils import (
         bed_mix_filter,
+        extract_audio_wav,
         find_ffmpeg,
-        raise_for_audio_extract_failure,
-        require_audio_stream,
     )
     ffmpeg = find_ffmpeg()
 
     def _extract():
         # A video with no audio stream has nothing to dub: say so rather than
         # fail with ffmpeg's bare "returned non-zero exit status 234".
-        require_audio_stream(video_path)
-        try:
-            subprocess.run(
-                [ffmpeg, "-y", "-i", video_path,
-                 "-vn", "-acodec", "pcm_s16le", "-ar", "22050", "-ac", "1",
-                 audio_path],
-                stdout=subprocess.DEVNULL, stderr=subprocess.PIPE,
-                timeout=300, check=True,
-            )
-        except subprocess.CalledProcessError as e:
-            raise_for_audio_extract_failure(e.stderr or b"", video_path)
-            raise
+        extract_audio_wav(
+            video_path, audio_path, sample_rate=22050, channels=1,
+        )
         # Get duration
         result = subprocess.run(
             [ffmpeg, "-i", audio_path],

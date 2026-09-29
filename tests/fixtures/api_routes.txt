@@ -131,6 +131,7 @@ GET /personalities
 GET /preview/{filename}
 GET /profile-images/search
 GET /profiles
+GET /profiles/from-media/{media_id}/audio/{speaker_id}
 GET /profiles/{profile_id}
 GET /profiles/{profile_id}/audio
 GET /profiles/{profile_id}/image
@@ -264,6 +265,8 @@ POST /personas/import
 POST /personas/inspect
 POST /preview/upload
 POST /profiles
+POST /profiles/from-media
+POST /profiles/from-media/{media_id}/choose
 POST /profiles/{profile_id}/consent
 POST /profiles/{profile_id}/lock
 POST /profiles/{profile_id}/unlock

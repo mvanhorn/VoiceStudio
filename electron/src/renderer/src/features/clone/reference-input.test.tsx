@@ -16,6 +16,33 @@ vi.mock('@/lib/audio/probe', () => ({
 vi.mock('@/lib/store/reference', () => ({ setReferenceFile: vi.fn() }));
 vi.mock('@/hooks/use-recording', () => ({ useRecording: vi.fn() }));
 vi.mock('@/components/recording-inputs', () => ({ RecordingInputs: () => null }));
+vi.mock('@/lib/api/client', () => ({
+  describeError: (err: Error) => err.message,
+  apiPath: (p: string) => p,
+}));
+const mediaApi = vi.hoisted(() => ({
+  fromMedia: vi.fn(),
+  chooseSpeaker: vi.fn(),
+  fetchSpeakerAudio: vi.fn(),
+}));
+vi.mock('@/lib/api/profiles', () => mediaApi);
+vi.mock('./speaker-picker', () => ({
+  SpeakerPicker: ({
+    speakers,
+    onPick,
+  }: {
+    speakers: { id: string }[];
+    onPick: (id: string) => void;
+  }) => (
+    <div>
+      {speakers.map((speaker) => (
+        <button key={speaker.id} type="button" onClick={() => onPick(speaker.id)}>
+          pick-{speaker.id}
+        </button>
+      ))}
+    </div>
+  ),
+}));
 import { ReferenceSourcePicker, UploadZone } from './reference-input';
 import { useRecording } from '@/hooks/use-recording';
 
@@ -120,4 +147,46 @@ it('drops a probe that finishes after the picker closes', async () => {
   await new Promise((resolve) => setTimeout(resolve, 0));
 
   expect(onAccept).not.toHaveBeenCalled();
+});
+
+const video = (name: string) => new File(['video'], name, { type: 'video/mp4' });
+
+it('loads an audio drop through setReferenceFile and does not post from-media', async () => {
+  const { setReferenceFile } = await import('@/lib/store/reference');
+  vi.mocked(setReferenceFile).mockResolvedValue({ ok: true, durationSeconds: 5, tooLong: false });
+  const { container } = render(<UploadZone />);
+  fireEvent.change(container.querySelector('input[type="file"]')!, {
+    target: { files: [clip('voice.wav')] },
+  });
+  await vi.waitFor(() => expect(setReferenceFile).toHaveBeenCalledOnce());
+  expect(vi.mocked(setReferenceFile).mock.calls[0][0]?.name).toBe('voice.wav');
+  expect(mediaApi.fromMedia).not.toHaveBeenCalled();
+});
+
+it('posts from-media for a video drop and does not toast unsupported_audio', async () => {
+  mediaApi.fromMedia.mockResolvedValue({
+    media_id: 'aabbccddeeff00112233445566778899',
+    isolation: 'skipped',
+    speakers: [
+      {
+        id: 'mix',
+        duration: 4,
+        ref_text: '',
+        audio_url: '/profiles/from-media/aabbccddeeff00112233445566778899/audio/mix',
+      },
+    ],
+  });
+  mediaApi.fetchSpeakerAudio.mockResolvedValue(clip('mix.wav'));
+  mediaApi.chooseSpeaker.mockResolvedValue({ speaker_id: 'mix', duration: 4, ref_text: '' });
+  const { container } = render(<UploadZone />);
+  fireEvent.change(container.querySelector('input[type="file"]')!, {
+    target: { files: [video('talk.mp4')] },
+  });
+  await vi.waitFor(() => expect(mediaApi.fromMedia).toHaveBeenCalledOnce());
+  expect(mediaApi.fromMedia.mock.calls[0][0].file.name).toBe('talk.mp4');
+  expect(mock.toastError).not.toHaveBeenCalledWith('clone.unsupported_audio');
+  await vi.waitFor(() =>
+    expect(mediaApi.chooseSpeaker).toHaveBeenCalledWith('aabbccddeeff00112233445566778899', 'mix'),
+  );
+  mock.probes.get('mix.wav')?.(4);
 });

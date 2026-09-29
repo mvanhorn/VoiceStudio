@@ -85,3 +85,44 @@ export async function replaceProfileAudio(
 export async function deleteProfile(id: string): Promise<void> {
   await apiFetch(`/profiles/${encodeURIComponent(id)}`, { method: 'DELETE' });
 }
+
+export interface CloneSpeaker {
+  id: string;
+  duration: number;
+  ref_text: string;
+  audio_url: string;
+}
+
+export interface FromMediaResponse {
+  media_id: string;
+  isolation: string;
+  speakers: CloneSpeaker[];
+  warning?: string | null;
+}
+
+export async function fromMedia(input: { file?: File; url?: string }): Promise<FromMediaResponse> {
+  const form = new FormData();
+  if (input.file) {
+    form.append('file', input.file, input.file.name);
+  }
+  if (input.url) form.append('url', input.url);
+  return apiJson<FromMediaResponse>('/profiles/from-media', { method: 'POST', body: form });
+}
+
+export async function chooseSpeaker(
+  mediaId: string,
+  speakerId: string,
+): Promise<{ speaker_id: string; duration: number; ref_text: string }> {
+  return apiJson(`/profiles/from-media/${encodeURIComponent(mediaId)}/choose`, {
+    method: 'POST',
+    body: JSON.stringify({ speaker_id: speakerId }),
+  });
+}
+
+export async function fetchSpeakerAudio(mediaId: string, speakerId: string): Promise<File> {
+  const res = await apiFetch(
+    `/profiles/from-media/${encodeURIComponent(mediaId)}/audio/${encodeURIComponent(speakerId)}`,
+  );
+  const blob = await res.blob();
+  return new File([blob], `${speakerId}.wav`, { type: 'audio/wav' });
+}

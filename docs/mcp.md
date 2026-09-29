@@ -11,7 +11,7 @@ start once VoiceStudio is open.
 | Tool | What it does |
 |---|---|
 | `generate_speech` | text → WAV by default. Uses the agent's bound voice unless a `profile_id` is passed. In `files`/`both` mode, pass `format="opus"` or `format="ogg"` for Ogg/Opus audio at both `audio_url` and `output_path`; requires an installed ffmpeg. |
-| `clone_voice` | reference audio (base64, or a `ref_audio_path` under the base path) → new voice profile. Returns a `profile_id` for use with `generate_speech`. |
+| `clone_voice` | reference audio or video (base64, or a `ref_audio_path` under the base path) → new voice profile. A clip with several speakers returns their ids and creates no profile until you pass `speaker_id`. Returns a `profile_id` for use with `generate_speech`. |
 | `transcribe` | audio (base64, or an `audio_path` under the base path) → text (646 languages). |
 | `list_voices` / `list_personalities` / `list_languages` | enumerate what's available. |
 | `check_health` | backend status + active GPU device. |

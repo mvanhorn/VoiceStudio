@@ -1,16 +1,27 @@
 import React from 'react';
-import { describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, screen } from '@testing-library/react';
 
-const { toastMock } = vi.hoisted(() => ({
-  toastMock: { error: vi.fn() },
-}));
+const { toastMock, mediaApi } = vi.hoisted(() => {
+  const error = vi.fn();
+  const toast = Object.assign(vi.fn(), { error });
+  return {
+    toastMock: toast,
+    mediaApi: {
+      fromMedia: vi.fn(),
+      chooseSpeaker: vi.fn(),
+      fetchSpeakerAudio: vi.fn(),
+    },
+  };
+});
 
 vi.mock('react-hot-toast', () => ({ toast: toastMock }));
 
 vi.mock('../WaveformPlayer', () => ({
   default: ({ src }) => <div data-testid="reference-waveform">{src.name}</div>,
 }));
+
+vi.mock('../../api/profiles', () => mediaApi);
 
 import AudioMethodPanel from './AudioMethodPanel';
 import { createInputLevelStore } from '../../utils/audioInput';
@@ -53,6 +64,8 @@ const baseProps = {
 };
 
 describe('AudioMethodPanel', () => {
+  afterEach(() => vi.clearAllMocks());
+
   it('starts with a clean upload choice and hides recording controls', () => {
     const { container } = render(<AudioMethodPanel {...baseProps} />);
 
@@ -94,8 +107,51 @@ describe('AudioMethodPanel', () => {
       dataTransfer: { files: [invalid] },
     });
 
-    expect(toastMock.error).toHaveBeenNthCalledWith(1, 'clone.unsupported_audio');
-    expect(toastMock.error).toHaveBeenNthCalledWith(2, 'clone.unsupported_audio');
+    expect(toastMock.error).toHaveBeenNthCalledWith(1, 'clone.unsupported_media');
+    expect(toastMock.error).toHaveBeenNthCalledWith(2, 'clone.unsupported_media');
+  });
+
+  it('loads an audio drop through ingestRefAudio and does not post from-media', () => {
+    const ingestRefAudio = vi.fn();
+    const audio = new File(['audio'], 'voice.wav', { type: 'audio/wav' });
+    const { container } = render(
+      <AudioMethodPanel {...baseProps} ingestRefAudio={ingestRefAudio} />,
+    );
+
+    fireEvent.change(container.querySelector('#audio-upload'), { target: { files: [audio] } });
+
+    expect(ingestRefAudio).toHaveBeenCalledWith(audio);
+    expect(mediaApi.fromMedia).not.toHaveBeenCalled();
+  });
+
+  it('posts from-media for a video drop and does not toast unsupported_audio', async () => {
+    const ingestRefAudio = vi.fn();
+    const wav = new File(['wav'], 'mix.wav', { type: 'audio/wav' });
+    mediaApi.fromMedia.mockResolvedValue({
+      media_id: 'aabbccddeeff00112233445566778899',
+      isolation: 'skipped',
+      speakers: [
+        {
+          id: 'mix',
+          duration: 4,
+          ref_text: '',
+          audio_url: '/profiles/from-media/aabbccddeeff00112233445566778899/audio/mix',
+        },
+      ],
+    });
+    mediaApi.fetchSpeakerAudio.mockResolvedValue(wav);
+    mediaApi.chooseSpeaker.mockResolvedValue({ speaker_id: 'mix', duration: 4, ref_text: '' });
+    const video = new File(['video'], 'talk.mp4', { type: 'video/mp4' });
+    const { container } = render(
+      <AudioMethodPanel {...baseProps} ingestRefAudio={ingestRefAudio} />,
+    );
+
+    fireEvent.change(container.querySelector('#audio-upload'), { target: { files: [video] } });
+
+    await vi.waitFor(() => expect(mediaApi.fromMedia).toHaveBeenCalledOnce());
+    expect(mediaApi.fromMedia.mock.calls[0][0].file.name).toBe('talk.mp4');
+    expect(toastMock.error).not.toHaveBeenCalledWith('clone.unsupported_audio');
+    await vi.waitFor(() => expect(ingestRefAudio).toHaveBeenCalledWith(wav));
   });
 
   it('previews the cleaned reference with the shared waveform player', () => {
