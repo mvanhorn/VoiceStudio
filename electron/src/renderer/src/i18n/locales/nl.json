@@ -331,7 +331,9 @@
     "h_ago": "{{count}}u geleden",
     "failed": "Transcriptie mislukt",
     "missing_model": "Er is geen spraak-naar-tekstmodel geïnstalleerd — deze functie heeft er een nodig om audio te transcriberen.",
-    "original_transcript": "Oorspronkelijk transcript"
+    "original_transcript": "Oorspronkelijk transcript",
+    "use_in_stories": "In Verhalen gebruiken",
+    "use_in_audiobook": "In Audioboek gebruiken"
   },
   "engineRuntime": {
     "ready": "Klaar",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Voor alle regels gebruiken",
     "deleteProjectConfirm": "Dit project permanent verwijderen?",
     "moveUp": "Omhoog",
-    "moveDown": "Omlaag"
+    "moveDown": "Omlaag",
+    "from_transcriptions": "Uit transcripties"
   },
   "audiobook": {
     "cast": "Cast",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Emotie beschrijving",
     "emotion_text_ph": "bijv. klinkt uitgeput en verdrietig",
     "emotion_alpha": "Emotie sterkte",
-    "lex_duplicate": "Gebruik één uitspraak per woord."
+    "lex_duplicate": "Gebruik één uitspraak per woord.",
+    "from_transcriptions": "Uit transcripties",
+    "import_replace_prompt": "Dit concept bevat al werk. Vervangen, de transcriptie toevoegen of annuleren?",
+    "import_replace": "Vervangen",
+    "import_append": "Toevoegen",
+    "import_cancel": "Annuleren"
   },
   "credentials": {
     "microsoft_key": "Microsoft Translator-sleutel",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Wat de agent moet doen",
     "inbound_brief_placeholder": "Neem een bericht aan: vraag naar naam, nummer en waar het over gaat.",
     "inbound_twilio_note": "Het nummer, de inloggegevens en de begroeting worden ingesteld op de Twilio-pagina."
+  },
+  "transcriptionPicker": {
+    "title": "Importeren vanuit een transcriptie",
+    "search_placeholder": "Transcripties zoeken…",
+    "empty": "Nog geen transcripties. Neem er één op op het tabblad Transcripties.",
+    "empty_search": "Er zijn geen transcripties die overeenkomen met uw zoekopdracht."
   }
 }

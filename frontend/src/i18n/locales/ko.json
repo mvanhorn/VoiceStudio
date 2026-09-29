@@ -718,7 +718,8 @@
     "exportFailed": "내보내기 실패 - 백엔드가 실행 중인지 확인하세요.",
     "global_speed": "속도",
     "global_speed_hint": "자체 속도 재정의 없이 모든 라인에 대한 읽기 속도",
-    "deleteProjectConfirm": "이 프로젝트를 영구적으로 삭제할까요?"
+    "deleteProjectConfirm": "이 프로젝트를 영구적으로 삭제할까요?",
+    "from_transcriptions": "전사에서 가져오기"
   },
   "common": {
     "stop": "중지",
@@ -1864,7 +1865,9 @@
     "exported": "내보낸 녹취록",
     "just_now": "지금 막",
     "m_ago": "{{count}}분 전",
-    "h_ago": "{{count}}시간 전"
+    "h_ago": "{{count}}시간 전",
+    "use_in_stories": "스토리에서 사용",
+    "use_in_audiobook": "오디오북에서 사용"
   },
   "setup": {
     "ready_desc": "첫 음성을 만들 준비가 되었습니다. 받아쓰기는 지금 또는 나중에 설정에서 구성할 수 있습니다.",
@@ -3056,7 +3059,12 @@
     "emotion_help": "단계별 감정 — IndexTTS2 엔진에서만 적용됩니다.",
     "emotion_text": "감정 설명",
     "emotion_text_ph": "예: 지쳐 보이고 슬픈 소리",
-    "emotion_alpha": "감정의 강도"
+    "emotion_alpha": "감정의 강도",
+    "from_transcriptions": "전사에서 가져오기",
+    "import_replace_prompt": "이 초안엔 이미 작업이 있습니다. 바꿀까요, 전사를 추가할까요, 아니면 취소할까요?",
+    "import_replace": "바꾸기",
+    "import_append": "추가",
+    "import_cancel": "취소"
   },
   "voicePanel": {
     "title": "음성",

@@ -489,7 +489,8 @@
     "exportFailed": "Dışa aktarma başarısız oldu — arka ucun çalıştığını kontrol edin.",
     "global_speed": "Hız",
     "global_speed_hint": "Kendi hız geçersiz kılma özelliği olmadan tüm satırlar için okuma hızı",
-    "deleteProjectConfirm": "Bu proje kalıcı olarak silinsin mi?"
+    "deleteProjectConfirm": "Bu proje kalıcı olarak silinsin mi?",
+    "from_transcriptions": "Transkripsiyonlardan"
   },
   "common": {
     "stop": "Durdur",
@@ -1564,7 +1565,9 @@
     "exported": "Dışa aktarılan transkripsiyonlar",
     "just_now": "Az önce",
     "m_ago": "{{count}}m önce",
-    "h_ago": "{{count}}sa önce"
+    "h_ago": "{{count}}sa önce",
+    "use_in_stories": "Hikayelerde kullan",
+    "use_in_audiobook": "Sesli kitapta kullan"
   },
   "setup": {
     "ready_desc": "İlk sesinizi oluşturmaya hazırsınız. Dikteyi şimdi veya daha sonra Ayarlar’dan yapılandırabilirsiniz.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Dereceli duygu — yalnızca IndexTTS2 motoru tarafından uygulanır.",
     "emotion_text": "Duygu açıklaması",
     "emotion_text_ph": "örn. tükenmiş ve üzgün geliyor",
-    "emotion_alpha": "Duygu gücü"
+    "emotion_alpha": "Duygu gücü",
+    "from_transcriptions": "Transkripsiyonlardan",
+    "import_replace_prompt": "Bu taslakta zaten çalışma var. Değiştirilsin, transkripsiyon eklensin veya iptal edilsin mi?",
+    "import_replace": "Değiştir",
+    "import_append": "Ekle",
+    "import_cancel": "İptal"
   },
   "voicePanel": {
     "title": "Ses",

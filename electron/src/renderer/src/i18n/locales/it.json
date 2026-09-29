@@ -333,7 +333,9 @@
     "h_ago": "{{count}}h fa",
     "failed": "Trascrizione non riuscita",
     "missing_model": "Nessun modello di riconoscimento vocale è installato — questa funzione ne richiede uno per trascrivere l'audio.",
-    "original_transcript": "Trascrizione originale"
+    "original_transcript": "Trascrizione originale",
+    "use_in_stories": "Usa nelle Storie",
+    "use_in_audiobook": "Usa nell'Audiolibro"
   },
   "engineRuntime": {
     "ready": "Pronto",
@@ -1658,7 +1660,8 @@
     "global_speed_apply": "Usa per tutte le righe",
     "deleteProjectConfirm": "Eliminare definitivamente questo progetto?",
     "moveUp": "Sposta su",
-    "moveDown": "Sposta giù"
+    "moveDown": "Sposta giù",
+    "from_transcriptions": "Dalle trascrizioni"
   },
   "audiobook": {
     "cast": "Cast",
@@ -1774,7 +1777,12 @@
     "emotion_text": "Descrizione dell'emozione",
     "emotion_text_ph": "es. suona stanco e triste",
     "emotion_alpha": "Forza emotiva",
-    "lex_duplicate": "Usa una sola pronuncia per parola."
+    "lex_duplicate": "Usa una sola pronuncia per parola.",
+    "from_transcriptions": "Dalle trascrizioni",
+    "import_replace_prompt": "Questa bozza contiene già del lavoro. Sostituirla, aggiungere la trascrizione o annullare?",
+    "import_replace": "Sostituisci",
+    "import_append": "Aggiungi",
+    "import_cancel": "Annulla"
   },
   "credentials": {
     "microsoft_key": "Chiave del traduttore Microsoft",
@@ -3004,5 +3012,11 @@
     "inbound_brief": "Cosa deve fare l'agente",
     "inbound_brief_placeholder": "Prendi un messaggio: chiedi nome, numero e motivo della chiamata.",
     "inbound_twilio_note": "Il numero, le credenziali e il messaggio di benvenuto si impostano nella pagina Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Importa da una trascrizione",
+    "search_placeholder": "Cerca trascrizioni…",
+    "empty": "Nessuna trascrizione ancora. Registrane uno nella scheda Trascrizioni.",
+    "empty_search": "Nessuna trascrizione corrisponde alla tua ricerca."
   }
 }

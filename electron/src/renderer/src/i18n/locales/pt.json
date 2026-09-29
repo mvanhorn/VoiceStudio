@@ -333,7 +333,9 @@
     "h_ago": "{{count}}h atrás",
     "failed": "Falha na transcrição",
     "missing_model": "Nenhum modelo de fala para texto está instalado — este recurso precisa de um para transcrever áudio.",
-    "original_transcript": "Transcrição original"
+    "original_transcript": "Transcrição original",
+    "use_in_stories": "Usar em Histórias",
+    "use_in_audiobook": "Usar no Audiolivro"
   },
   "engineRuntime": {
     "ready": "Pronto",
@@ -1658,7 +1660,8 @@
     "global_speed_apply": "Usar em todas as linhas",
     "deleteProjectConfirm": "Excluir este projeto permanentemente?",
     "moveUp": "Mover para cima",
-    "moveDown": "Mover para baixo"
+    "moveDown": "Mover para baixo",
+    "from_transcriptions": "Das transcrições"
   },
   "audiobook": {
     "cast": "Elenco",
@@ -1774,7 +1777,12 @@
     "emotion_text": "Descrição da emoção",
     "emotion_text_ph": "ex.: soa exausto e triste",
     "emotion_alpha": "Força emocional",
-    "lex_duplicate": "Use uma única pronúncia por palavra."
+    "lex_duplicate": "Use uma única pronúncia por palavra.",
+    "from_transcriptions": "Das transcrições",
+    "import_replace_prompt": "Este rascunho já tem conteúdo. Substituí-lo, acrescentar a transcrição ou cancelar?",
+    "import_replace": "Substituir",
+    "import_append": "Acrescentar",
+    "import_cancel": "Cancelar"
   },
   "credentials": {
     "microsoft_key": "Chave do Microsoft Tradutor",
@@ -3004,5 +3012,11 @@
     "inbound_brief": "O que o agente deve fazer",
     "inbound_brief_placeholder": "Anote um recado: pergunte o nome, o número e o assunto.",
     "inbound_twilio_note": "O número, as credenciais e a saudação são definidos na página do Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Importar de uma transcrição",
+    "search_placeholder": "Pesquisar transcrições…",
+    "empty": "Ainda não há transcrições. Grave um na guia Transcrições.",
+    "empty_search": "Nenhuma transcrição corresponde à sua pesquisa."
   }
 }

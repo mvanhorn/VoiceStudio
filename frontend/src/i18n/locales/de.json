@@ -489,7 +489,8 @@
     "exportFailed": "Der Export ist fehlgeschlagen. Überprüfen Sie, ob das Backend ausgeführt wird.",
     "global_speed": "Geschwindigkeit",
     "global_speed_hint": "Lesegeschwindigkeit für alle Zeilen ohne eigene Geschwindigkeitsüberschreibung",
-    "deleteProjectConfirm": "Dieses Projekt dauerhaft löschen?"
+    "deleteProjectConfirm": "Dieses Projekt dauerhaft löschen?",
+    "from_transcriptions": "Aus Transkriptionen"
   },
   "common": {
     "stop": "Stopp",
@@ -1564,7 +1565,9 @@
     "exported": "Exportierte Transkriptionen",
     "just_now": "Gerade eben",
     "m_ago": "Vor {{count}}m",
-    "h_ago": "Vor {{count}}h"
+    "h_ago": "Vor {{count}}h",
+    "use_in_stories": "In Geschichten verwenden",
+    "use_in_audiobook": "Im Hörbuch verwenden"
   },
   "setup": {
     "ready_desc": "Du kannst jetzt deine erste Stimme erstellen. Die Diktierfunktion kannst du jetzt oder später in den Einstellungen einrichten.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Abgestufte Emotion — nur vom IndexTTS2-Engine angewendet.",
     "emotion_text": "Emotionsbeschreibung",
     "emotion_text_ph": "z.B. klingt erschöpft und traurig",
-    "emotion_alpha": "Emotionale Stärke"
+    "emotion_alpha": "Emotionale Stärke",
+    "from_transcriptions": "Aus Transkriptionen",
+    "import_replace_prompt": "Dieser Entwurf enthält bereits Inhalt. Ersetzen, die Transkription anhängen oder abbrechen?",
+    "import_replace": "Ersetzen",
+    "import_append": "Anhängen",
+    "import_cancel": "Abbrechen"
   },
   "voicePanel": {
     "title": "Stimme",

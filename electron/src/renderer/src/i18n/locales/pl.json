@@ -335,7 +335,9 @@
     "h_ago": "{{count}}h temu",
     "failed": "Transkrypcja nie powiodła się",
     "missing_model": "Nie zainstalowano modelu zamiany mowy na tekst — ta funkcja wymaga go do transkrypcji dźwięku.",
-    "original_transcript": "Oryginalna transkrypcja"
+    "original_transcript": "Oryginalna transkrypcja",
+    "use_in_stories": "Użyj w Historiach",
+    "use_in_audiobook": "Użyj w Audiobooku"
   },
   "engineRuntime": {
     "ready": "Gotowy",
@@ -1660,7 +1662,8 @@
     "global_speed_apply": "Użyj dla wszystkich wierszy",
     "deleteProjectConfirm": "Usunąć ten projekt na stałe?",
     "moveUp": "Przenieś w górę",
-    "moveDown": "Przenieś w dół"
+    "moveDown": "Przenieś w dół",
+    "from_transcriptions": "Z transkrypcji"
   },
   "audiobook": {
     "cast": "Obsada",
@@ -1776,7 +1779,12 @@
     "emotion_text": "Opis emocji",
     "emotion_text_ph": "np. brzmi wyczerpany i smutny",
     "emotion_alpha": "Siła emocji",
-    "lex_duplicate": "Użyj jednej wymowy dla każdego słowa."
+    "lex_duplicate": "Użyj jednej wymowy dla każdego słowa.",
+    "from_transcriptions": "Z transkrypcji",
+    "import_replace_prompt": "Ten szkic ma już treść. Zastąpić go, dopisać transkrypcję czy anulować?",
+    "import_replace": "Zastąp",
+    "import_append": "Dopisz",
+    "import_cancel": "Anuluj"
   },
   "credentials": {
     "microsoft_key": "Klucz tłumacza Microsoft",
@@ -3006,5 +3014,11 @@
     "inbound_brief": "Co powinien zrobić agent",
     "inbound_brief_placeholder": "Przyjmij wiadomość: zapytaj o imię, numer i temat rozmowy.",
     "inbound_twilio_note": "Numer, dane uwierzytelniające i powitanie ustawia się na stronie Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Importuj z transkrypcji",
+    "search_placeholder": "Wyszukaj transkrypcje…",
+    "empty": "Nie ma jeszcze transkrypcji. Nagraj jeden na karcie Transkrypcje.",
+    "empty_search": "Żadne transkrypcje nie pasują do Twojego wyszukiwania."
   }
 }

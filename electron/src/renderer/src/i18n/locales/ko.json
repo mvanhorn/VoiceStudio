@@ -331,7 +331,9 @@
     "h_ago": "{{count}}시간 전",
     "failed": "받아쓰기 실패",
     "missing_model": "음성 인식 모델이 설치되어 있지 않습니다 — 이 기능으로 오디오를 전사하려면 모델이 필요합니다.",
-    "original_transcript": "원본 대본"
+    "original_transcript": "원본 대본",
+    "use_in_stories": "스토리에서 사용",
+    "use_in_audiobook": "오디오북에서 사용"
   },
   "engineRuntime": {
     "ready": "준비",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "모든 줄에 적용",
     "deleteProjectConfirm": "이 프로젝트를 영구적으로 삭제할까요?",
     "moveUp": "위로 이동",
-    "moveDown": "아래로 이동"
+    "moveDown": "아래로 이동",
+    "from_transcriptions": "전사에서 가져오기"
   },
   "audiobook": {
     "cast": "캐스트",
@@ -1772,7 +1775,12 @@
     "emotion_text": "감정 설명",
     "emotion_text_ph": "예: 지쳐 보이고 슬픈 소리",
     "emotion_alpha": "감정의 강도",
-    "lex_duplicate": "단어마다 발음을 하나만 지정하세요."
+    "lex_duplicate": "단어마다 발음을 하나만 지정하세요.",
+    "from_transcriptions": "전사에서 가져오기",
+    "import_replace_prompt": "이 초안엔 이미 작업이 있습니다. 바꿀까요, 전사를 추가할까요, 아니면 취소할까요?",
+    "import_replace": "바꾸기",
+    "import_append": "추가",
+    "import_cancel": "취소"
   },
   "credentials": {
     "microsoft_key": "마이크로소프트 번역기 키",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "에이전트가 해야 할 일",
     "inbound_brief_placeholder": "메시지를 받아두세요: 이름, 번호, 용건을 물어보세요.",
     "inbound_twilio_note": "번호, 인증 정보, 인사말은 Twilio 페이지에서 설정합니다."
+  },
+  "transcriptionPicker": {
+    "title": "전사에서 가져오기",
+    "search_placeholder": "전사본 검색…",
+    "empty": "아직 전사본이 없습니다. 전사 탭에서 하나를 녹음하세요.",
+    "empty_search": "검색어와 일치하는 전사본이 없습니다."
   }
 }

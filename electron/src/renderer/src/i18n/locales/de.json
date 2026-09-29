@@ -331,7 +331,9 @@
     "h_ago": "Vor {{count}}h",
     "failed": "Transkription fehlgeschlagen",
     "missing_model": "Es ist kein Sprache-zu-Text-Modell installiert — diese Funktion benötigt eines zum Transkribieren.",
-    "original_transcript": "Originaltranskript"
+    "original_transcript": "Originaltranskript",
+    "use_in_stories": "In Geschichten verwenden",
+    "use_in_audiobook": "Im Hörbuch verwenden"
   },
   "engineRuntime": {
     "ready": "Bereit",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Für alle Zeilen verwenden",
     "deleteProjectConfirm": "Dieses Projekt dauerhaft löschen?",
     "moveUp": "Nach oben",
-    "moveDown": "Nach unten"
+    "moveDown": "Nach unten",
+    "from_transcriptions": "Aus Transkriptionen"
   },
   "audiobook": {
     "cast": "Besetzung",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Emotionsbeschreibung",
     "emotion_text_ph": "z.B. klingt erschöpft und traurig",
     "emotion_alpha": "Emotionale Stärke",
-    "lex_duplicate": "Verwende nur eine Aussprache pro Wort."
+    "lex_duplicate": "Verwende nur eine Aussprache pro Wort.",
+    "from_transcriptions": "Aus Transkriptionen",
+    "import_replace_prompt": "Dieser Entwurf enthält bereits Inhalt. Ersetzen, die Transkription anhängen oder abbrechen?",
+    "import_replace": "Ersetzen",
+    "import_append": "Anhängen",
+    "import_cancel": "Abbrechen"
   },
   "credentials": {
     "microsoft_key": "Microsoft-Übersetzerschlüssel",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Was der Agent tun soll",
     "inbound_brief_placeholder": "Eine Nachricht aufnehmen: nach Name, Nummer und Anliegen fragen.",
     "inbound_twilio_note": "Nummer, Zugangsdaten und Begrüßung werden auf der Twilio-Seite festgelegt."
+  },
+  "transcriptionPicker": {
+    "title": "Aus einer Transkription importieren",
+    "search_placeholder": "Transkriptionen suchen…",
+    "empty": "Noch keine Transkriptionen. Nehmen Sie eine davon auf der Registerkarte „Transkriptionen“ auf.",
+    "empty_search": "Keine Transkriptionen entsprechen Ihrer Suche."
   }
 }

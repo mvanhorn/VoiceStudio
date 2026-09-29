@@ -49,6 +49,8 @@ _REF_ALLOWLIST = (
     "Remote workers** sends individual jobs to GPUs",
     # owner-requested workspace promotion (engines + model store out of Settings), no issue
     "Model Catalogue** — a workspace of its own",
+    # owner-authored change with no tracker issue
+    "Send a saved transcription into Stories or Audiobook as a draft",
 )
 
 _HEADING = re.compile(r"^## \[([^\]]+)\](?:\s*[—–-]\s*(.*))?$")

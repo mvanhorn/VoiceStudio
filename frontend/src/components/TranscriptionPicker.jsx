@@ -1,9 +1,12 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Mic, Search, Clock, Languages } from 'lucide-react';
-import { Dialog, Input } from '../ui';
+import { Button, Dialog, Input } from '../ui';
 import { toMillis } from '../utils/relativeTime';
 import { loadTranscriptions, TRANSCRIPTION_EVENT } from '../utils/transcriptionsStore';
+import { preferredTranscript } from '../utils/transcriptionFormat';
+import { hasLongformSource, toAudiobookScript } from '../utils/transcriptionToLongform';
+import { useAppStore } from '../store';
 
 /**
  * A controlled modal that lets the user seed long-form work from a past
@@ -14,6 +17,7 @@ import { loadTranscriptions, TRANSCRIPTION_EVENT } from '../utils/transcriptions
  */
 export default function TranscriptionPicker({ open, onClose, onPick }) {
   const { t } = useTranslation();
+  const setMode = useAppStore((s) => s.setMode);
   const [entries, setEntries] = useState([]);
   const [search, setSearch] = useState('');
 
@@ -52,12 +56,12 @@ export default function TranscriptionPicker({ open, onClose, onPick }) {
         .map((e, idx) => ({
           entry: e,
           key: e?.id ?? idx,
-          text: String(e?.text ?? ''),
+          text: preferredTranscript(e) || toAudiobookScript(e).script,
           language: e?.language && e.language !== 'unknown' ? e.language : null,
           duration: typeof e?.duration_s === 'number' && e.duration_s > 0 ? e.duration_s : null,
           time: formatTime(e?.timestamp),
         }))
-        .filter((r) => r.text.trim()),
+        .filter((r) => hasLongformSource(r.entry) && r.text.trim()),
     [entries],
   ); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -91,6 +95,18 @@ export default function TranscriptionPicker({ open, onClose, onPick }) {
               ? t('transcriptionPicker.empty')
               : t('transcriptionPicker.empty_search')}
           </p>
+          {rows.length === 0 ? (
+            <Button
+              size="sm"
+              variant="subtle"
+              onClick={() => {
+                onClose();
+                setMode('transcriptions');
+              }}
+            >
+              {t('nav.transcribe')}
+            </Button>
+          ) : null}
         </div>
       ) : (
         <div
@@ -127,6 +143,33 @@ export default function TranscriptionPicker({ open, onClose, onPick }) {
           ))}
         </div>
       )}
+    </Dialog>
+  );
+}
+
+/** Replace / Append / Cancel when the destination draft already has work. */
+export function LongformImportConfirm({ open, onClose, onReplace, onAppend }) {
+  const { t } = useTranslation();
+  return (
+    <Dialog
+      open={open}
+      onClose={onClose}
+      title={t('audiobook.from_transcriptions')}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose}>
+            {t('audiobook.import_cancel')}
+          </Button>
+          <Button variant="subtle" onClick={onAppend}>
+            {t('audiobook.import_append')}
+          </Button>
+          <Button variant="danger" onClick={onReplace}>
+            {t('audiobook.import_replace')}
+          </Button>
+        </>
+      }
+    >
+      <p className="m-0 text-sm leading-6 text-fg">{t('audiobook.import_replace_prompt')}</p>
     </Dialog>
   );
 }

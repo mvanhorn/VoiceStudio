@@ -1,5 +1,14 @@
 import { useRef } from 'react';
-import { BookMarked, BookOpen, FileUp, ListTree, Loader, Sparkles, Square } from 'lucide-react';
+import {
+  BookMarked,
+  BookOpen,
+  FileUp,
+  ListTree,
+  Loader,
+  Mic,
+  Sparkles,
+  Square,
+} from 'lucide-react';
 
 import { Button } from '../../ui';
 
@@ -12,6 +21,7 @@ export default function AudiobookHero({
   generating,
   canRun,
   onImport,
+  onFromTranscriptions,
   onLoadSample,
   onPreview,
   onCreate,
@@ -47,6 +57,20 @@ export default function AudiobookHero({
           >
             {t('audiobook.import')}
           </Button>
+          {onFromTranscriptions ? (
+            <Button
+              type="button"
+              variant="subtle"
+              size="sm"
+              title={t('audiobook.from_transcriptions')}
+              aria-label={t('audiobook.from_transcriptions')}
+              onClick={onFromTranscriptions}
+              disabled={busy}
+              leading={<Mic />}
+            >
+              {t('audiobook.from_transcriptions')}
+            </Button>
+          ) : null}
           <input
             ref={importInputRef}
             type="file"

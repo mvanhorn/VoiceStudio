@@ -489,7 +489,8 @@
     "exportFailed": "فشل التصدير — تحقق من تشغيل الواجهة الخلفية.",
     "global_speed": "السرعة",
     "global_speed_hint": "سرعة القراءة لجميع الخطوط دون تجاوز السرعة الخاصة بها",
-    "deleteProjectConfirm": "هل تريد حذف هذا المشروع نهائيًا؟"
+    "deleteProjectConfirm": "هل تريد حذف هذا المشروع نهائيًا؟",
+    "from_transcriptions": "من النصوص المكتوبة"
   },
   "common": {
     "stop": "توقف",
@@ -1564,7 +1565,9 @@
     "exported": "النسخ المصدرة",
     "just_now": "الآن فقط",
     "m_ago": "{{count}}م مضت",
-    "h_ago": "{{count}}h منذ"
+    "h_ago": "{{count}}h منذ",
+    "use_in_stories": "استخدمه في القصص",
+    "use_in_audiobook": "استخدمه في الكتاب الصوتي"
   },
   "setup": {
     "ready_desc": "أنت جاهز لإنشاء صوتك الأول. يمكنك إعداد الإملاء الآن أو لاحقًا في الإعدادات.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "عاطفة متدرجة — يتم تطبيقها فقط من خلال محرك IndexTTS2.",
     "emotion_text": "وصف العاطفة",
     "emotion_text_ph": "على سبيل المثال يبدو متعباً وحزيناً",
-    "emotion_alpha": "قوة العاطفة"
+    "emotion_alpha": "قوة العاطفة",
+    "from_transcriptions": "من النصوص المكتوبة",
+    "import_replace_prompt": "يحتوي هذا المسودة على عمل بالفعل. هل تريد استبداله أو إلحاق النص أو الإلغاء؟",
+    "import_replace": "استبدال",
+    "import_append": "إلحاق",
+    "import_cancel": "إلغاء"
   },
   "voicePanel": {
     "title": "صوت",

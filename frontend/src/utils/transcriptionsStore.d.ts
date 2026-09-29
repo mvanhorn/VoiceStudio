@@ -2,6 +2,8 @@ export interface TranscriptSegment {
   start?: number | null;
   end?: number | null;
   text: string;
+  speaker_id?: string | null;
+  speaker?: string | null;
 }
 export interface TranscriptEntry {
   id: number;

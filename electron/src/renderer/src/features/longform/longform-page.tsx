@@ -1,14 +1,16 @@
 import { readTextFile } from '../../../../../../frontend/src/utils/readTextFile';
 import { ProfileAvatar } from '@/components/profile-avatar';
 import {
+  AudioLinesIcon,
   BookOpenTextIcon,
   FileAudioIcon,
   FingerprintIcon,
+  HistoryIcon,
   ImportIcon,
   LanguagesIcon,
+  SearchIcon,
   Trash2Icon,
 } from 'lucide-react';
-import { AudioLinesIcon } from 'lucide-react';
 import { SecondarySidebar } from '@/components/workspace-sidebar';
 import { WorkspaceHeader } from '@/components/app-shell/workspace-header';
 import { PipelineFailure } from '@/components/pipeline-failure';
@@ -18,6 +20,14 @@ import { saveLocalFile } from '@/lib/local-export';
 import { StoryCast, StoryEditor } from './story-editor';
 import { clearedScriptPatch, scriptSize } from './story-clear';
 import { ConfirmDialog } from '../clone/confirm-dialog';
+import { formatRelative } from '../clone/format';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import { AudiobookMarkupToolbar } from './audiobook-markup-toolbar';
 import { storyVoicesReady } from './story-inputs';
 import { StorySpeed } from './story-speed';
@@ -63,6 +73,19 @@ import {
   type Mode,
 } from './longform-session';
 import { SAMPLE_AUDIOBOOK_SCRIPT } from '../../../../../../frontend/src/data/sampleAudiobook';
+import { preferredTranscript } from '../../../../../../frontend/src/utils/transcriptionFormat';
+import {
+  loadTranscriptions,
+  subscribeTranscriptions,
+  type TranscriptEntry,
+} from '../../../../../../frontend/src/utils/transcriptionsStore';
+import {
+  audiobookDraftOccupied,
+  canCreateLongformFromTranscription,
+  loadTranscriptionIntoAudiobook,
+  loadTranscriptionIntoStories,
+  storiesDraftOccupied,
+} from '../transcriptions/transcription-to-longform';
 import { useTtsReadiness } from '@/hooks/use-tts-readiness';
 interface Recovery {
   job_id: string;
@@ -87,6 +110,9 @@ export function LongformPage({ mode }: { mode: Mode }) {
   const [exporting, setExporting] = useState(false);
   const [warningsDismissed, setWarningsDismissed] = useState(false);
   const [clearOpen, setClearOpen] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [pendingTranscription, setPendingTranscription] = useState<TranscriptEntry | null>(null);
   const audiobookInput = useRef<HTMLTextAreaElement>(null);
   const locked = !!session.active || importing;
   const scriptLines = scriptSize(mode, draft);
@@ -206,6 +232,28 @@ export function LongformPage({ mode }: { mode: Mode }) {
     } catch (cause) {
       setLocalError(describeError(cause));
     }
+  };
+  const occupied = mode === 'stories' ? storiesDraftOccupied(draft) : audiobookDraftOccupied(draft);
+  const loadTranscription = (
+    entry: TranscriptEntry,
+    conflict: 'replace' | 'append' = 'replace',
+  ) => {
+    if (session.active) return false;
+    return mode === 'stories'
+      ? loadTranscriptionIntoStories(entry, {
+          unknownSpeakerLabel: t('audiobook.meta_narrator'),
+          mode: conflict,
+        })
+      : loadTranscriptionIntoAudiobook(entry, { mode: conflict });
+  };
+  const pickTranscription = (entry: TranscriptEntry) => {
+    if (!canCreateLongformFromTranscription(entry) || session.active) return;
+    if (occupied) {
+      setPendingTranscription(entry);
+      setConflictOpen(true);
+      return;
+    }
+    loadTranscription(entry);
   };
   return (
     <div className="flex h-full min-h-0 flex-col">
@@ -368,24 +416,39 @@ export function LongformPage({ mode }: { mode: Mode }) {
                 </h2>
                 <p className="mt-1 text-xs text-muted-foreground">{t(mode + '.subtitle')}</p>
               </div>
-              <label className={buttonVariants({ variant: 'outline', size: 'sm' })}>
-                <ImportIcon />
-                {t('audiobook.import')}
-                <input
-                  aria-label={t('audiobook.import')}
-                  type="file"
-                  accept={
-                    mode === 'stories' ? '.txt,.md,.srt,.vtt,.epub,.pdf' : '.txt,.md,.epub,.pdf'
-                  }
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
                   disabled={locked}
-                  className="sr-only"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    e.target.value = '';
-                    if (file) void importFile(file);
-                  }}
-                />
-              </label>
+                  onClick={() => setPickerOpen(true)}
+                >
+                  <HistoryIcon />
+                  {t(
+                    mode === 'stories'
+                      ? 'stories.from_transcriptions'
+                      : 'audiobook.from_transcriptions',
+                  )}
+                </Button>
+                <label className={buttonVariants({ variant: 'outline', size: 'sm' })}>
+                  <ImportIcon />
+                  {t('audiobook.import')}
+                  <input
+                    aria-label={t('audiobook.import')}
+                    type="file"
+                    accept={
+                      mode === 'stories' ? '.txt,.md,.srt,.vtt,.epub,.pdf' : '.txt,.md,.epub,.pdf'
+                    }
+                    disabled={locked}
+                    className="sr-only"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      e.target.value = '';
+                      if (file) void importFile(file);
+                    }}
+                  />
+                </label>
+              </div>
               <Button
                 variant="ghost"
                 size="sm"
@@ -407,6 +470,34 @@ export function LongformPage({ mode }: { mode: Mode }) {
                 }
                 confirmLabel={t('stories.clearScript')}
                 onConfirm={() => set(clearedScriptPatch(mode))}
+              />
+              <TranscriptionHistoryPicker
+                open={pickerOpen}
+                onOpenChange={setPickerOpen}
+                onPick={pickTranscription}
+              />
+              <ConfirmDialog
+                open={conflictOpen}
+                onOpenChange={(open) => {
+                  setConflictOpen(open);
+                  if (!open) setPendingTranscription(null);
+                }}
+                title={t(
+                  mode === 'stories'
+                    ? 'stories.from_transcriptions'
+                    : 'audiobook.from_transcriptions',
+                )}
+                description={t('audiobook.import_replace_prompt')}
+                confirmLabel={t('audiobook.import_replace')}
+                appendLabel={t('audiobook.import_append')}
+                cancelLabel={t('audiobook.import_cancel')}
+                destructive
+                onConfirm={() => {
+                  if (pendingTranscription) loadTranscription(pendingTranscription, 'replace');
+                }}
+                onAppend={() => {
+                  if (pendingTranscription) loadTranscription(pendingTranscription, 'append');
+                }}
               />
               {mode === 'audiobook' && !draft.script.trim() && (
                 <Button
@@ -555,4 +646,109 @@ export function StoriesPage() {
 }
 export function AudiobookPage() {
   return <LongformPage key="audiobook" mode="audiobook" />;
+}
+
+export function TranscriptionHistoryPicker({
+  open,
+  onOpenChange,
+  onPick,
+}: {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onPick: (entry: TranscriptEntry) => void;
+}) {
+  const { t, i18n } = useTranslation();
+  const [entries, setEntries] = useState<TranscriptEntry[]>([]);
+  const [search, setSearch] = useState('');
+  useEffect(() => {
+    if (!open) return undefined;
+    setSearch('');
+    setEntries(loadTranscriptions());
+    return subscribeTranscriptions(setEntries);
+  }, [open]);
+  const q = search.trim().toLowerCase();
+  const rows = entries.filter((entry) => canCreateLongformFromTranscription(entry));
+  const visible = rows.filter((entry) => {
+    if (!q) return true;
+    const text = preferredTranscript(entry);
+    return (
+      text.toLowerCase().includes(q) ||
+      String(entry.language || '')
+        .toLowerCase()
+        .includes(q)
+    );
+  });
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-lg" showCloseButton>
+        <DialogHeader>
+          <DialogTitle>{t('transcriptionPicker.title')}</DialogTitle>
+          <DialogDescription className="sr-only">
+            {t('transcriptionPicker.title')}
+          </DialogDescription>
+        </DialogHeader>
+        {rows.length > 0 ? (
+          <div className="flex items-center gap-2">
+            <SearchIcon className="size-4 text-muted-foreground" aria-hidden="true" />
+            <Input
+              value={search}
+              onChange={(event) => setSearch(event.target.value)}
+              placeholder={t('transcriptionPicker.search_placeholder')}
+              aria-label={t('transcriptionPicker.search_placeholder')}
+            />
+          </div>
+        ) : null}
+        {visible.length === 0 ? (
+          <div className="flex flex-col items-center gap-3 px-4 py-10 text-center text-sm text-muted-foreground">
+            <HistoryIcon className="size-6" aria-hidden="true" />
+            <p>
+              {rows.length === 0
+                ? t('transcriptionPicker.empty')
+                : t('transcriptionPicker.empty_search')}
+            </p>
+            {rows.length === 0 ? (
+              <Link
+                to="/transcriptions"
+                className={buttonVariants({ variant: 'outline', size: 'sm' })}
+                onClick={() => onOpenChange(false)}
+              >
+                {t('nav.transcribe')}
+              </Link>
+            ) : null}
+          </div>
+        ) : (
+          <div className="flex max-h-[50vh] flex-col gap-2 overflow-y-auto" role="list">
+            {visible.map((entry, index) => {
+              const text = preferredTranscript(entry);
+              const preview = text.length > 120 ? `${text.slice(0, 120)}…` : text;
+              return (
+                <button
+                  type="button"
+                  key={entry.id ?? index}
+                  className="flex w-full flex-col gap-1 rounded-lg border border-border/60 px-3 py-2 text-left text-sm hover:bg-accent/60"
+                  onClick={() => {
+                    onPick(entry);
+                    onOpenChange(false);
+                  }}
+                >
+                  <span className="leading-5">{preview || t('transcriptions.empty_title')}</span>
+                  <span className="flex flex-wrap gap-3 text-xs text-muted-foreground">
+                    {entry.timestamp ? (
+                      <span>{formatRelative(entry.timestamp, i18n.language)}</span>
+                    ) : null}
+                    {entry.language && entry.language !== 'unknown' ? (
+                      <span>{entry.language}</span>
+                    ) : null}
+                    {Number(entry.duration_s) > 0 ? (
+                      <span className="tabular-nums">{Number(entry.duration_s).toFixed(1)}s</span>
+                    ) : null}
+                  </span>
+                </button>
+              );
+            })}
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
 }

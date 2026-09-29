@@ -489,7 +489,8 @@
     "exportFailed": "निर्यात विफल - जांचें कि बैकएंड चल रहा है।",
     "global_speed": "गति",
     "global_speed_hint": "अपनी स्वयं की गति ओवरराइड के बिना सभी लाइनों के लिए पढ़ने की गति",
-    "deleteProjectConfirm": "इस प्रोजेक्ट को स्थायी रूप से मिटाएँ?"
+    "deleteProjectConfirm": "इस प्रोजेक्ट को स्थायी रूप से मिटाएँ?",
+    "from_transcriptions": "ट्रांस्क्रिप्शन से"
   },
   "common": {
     "stop": "रुकें",
@@ -1564,7 +1565,9 @@
     "exported": "निर्यातित प्रतिलेखन",
     "just_now": "अभी अभी",
     "m_ago": "{{count}}m पहले",
-    "h_ago": "{{count}}h पहले"
+    "h_ago": "{{count}}h पहले",
+    "use_in_stories": "कहानियों में उपयोग करें",
+    "use_in_audiobook": "ऑडियोबुक में उपयोग करें"
   },
   "setup": {
     "ready_desc": "अब आप अपनी पहली आवाज़ बना सकते हैं। डिक्टेशन अभी या बाद में सेटिंग्स में सेट कर सकते हैं।",
@@ -2655,7 +2658,12 @@
     "emotion_help": "क्रमिक भावना — केवल IndexTTS2 इंजन द्वारा लागू किया गया।",
     "emotion_text": "भावना विवरण",
     "emotion_text_ph": "जैसे। थका हुआ और उदास लगता है",
-    "emotion_alpha": "भावना की शक्ति"
+    "emotion_alpha": "भावना की शक्ति",
+    "from_transcriptions": "ट्रांस्क्रिप्शन से",
+    "import_replace_prompt": "इस ड्राफ्ट में पहले से काम है। इसे बदलें, ट्रांस्क्रिप्शन जोड़ें, या रद्द करें?",
+    "import_replace": "बदलें",
+    "import_append": "जोड़ें",
+    "import_cancel": "रद्द करें"
   },
   "voicePanel": {
     "title": "आवाज",

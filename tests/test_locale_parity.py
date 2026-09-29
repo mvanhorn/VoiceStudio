@@ -99,10 +99,10 @@ _ENGINE_AGNOSTIC_KEYS = (
 # Never raise one: if this fails after adding en.json keys, add the keys to
 # every locale (translated) in the same change instead.
 _MISSING_BASELINE = {
-    "ar": 475, "de": 475, "es": 475, "fr": 475, "hi": 475, "id": 475,
-    "it": 475, "ja": 475, "ko": 0, "nl": 475, "pl": 475, "pt": 475,
-    "ru": 475, "sv": 475, "th": 475, "tr": 475, "uk": 475, "vi": 475,
-    "zh-CN": 0, "zh-TW": 475,
+    "ar": 472, "de": 472, "es": 472, "fr": 472, "hi": 472, "id": 472,
+    "it": 472, "ja": 472, "ko": 0, "nl": 472, "pl": 472, "pt": 472,
+    "ru": 472, "sv": 472, "th": 472, "tr": 472, "uk": 472, "vi": 472,
+    "zh-CN": 0, "zh-TW": 472,
 }
 
 #: Keys every locale must carry regardless of the aggregate ratchet above.

@@ -98,7 +98,8 @@
     "exportFailed": "导出失败 — 请检查后端是否运行。",
     "global_speed": "速度",
     "global_speed_hint": "所有台词的朗读速度（未单独设置语速的台词）",
-    "deleteProjectConfirm": "永久删除此项目？"
+    "deleteProjectConfirm": "永久删除此项目？",
+    "from_transcriptions": "从转录导入"
   },
   "common": {
     "stop": "停止",
@@ -1816,7 +1817,9 @@
     "exported": "已导出转录记录",
     "just_now": "刚刚",
     "m_ago": "{{count}} 分钟前",
-    "h_ago": "{{count}} 小时前"
+    "h_ago": "{{count}} 小时前",
+    "use_in_stories": "在故事中使用",
+    "use_in_audiobook": "在有声书中使用"
   },
   "setup": {
     "ready_desc": "现在可以创建你的第一个声音了。你可以立即设置语音输入，也可以稍后在设置中完成。",
@@ -3098,7 +3101,12 @@
     "emotion_help": "分层情感 — 仅由 IndexTTS2 引擎应用。",
     "emotion_text": "情感描述",
     "emotion_text_ph": "例如：听起来疲惫而悲伤",
-    "emotion_alpha": "情感强度"
+    "emotion_alpha": "情感强度",
+    "from_transcriptions": "从转录导入",
+    "import_replace_prompt": "此草稿已有内容。要替换、追加转录，还是取消？",
+    "import_replace": "替换",
+    "import_append": "追加",
+    "import_cancel": "取消"
   },
   "voicePanel": {
     "title": "语音",

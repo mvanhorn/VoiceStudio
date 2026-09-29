@@ -57,6 +57,8 @@ import {
 } from '../utils/storyTokens';
 import { parseScript } from '../utils/parseScript';
 import { importToText } from '../utils/importStory';
+import TranscriptionPicker, { LongformImportConfirm } from './TranscriptionPicker';
+import { hasLongformSource, loadStoryState } from '../utils/transcriptionToLongform';
 import {
   DEFAULT_SPLIT_MODE,
   DEFAULT_SPLIT_MAX,
@@ -191,6 +193,10 @@ export default function StoriesEditor({ profiles = [] }) {
   const [splitText, setSplitText] = useState('');
   const [splitMode, setSplitMode] = useState(DEFAULT_SPLIT_MODE);
   const [splitMax, setSplitMax] = useState(DEFAULT_SPLIT_MAX.sentences);
+  const lastOutput = useAppStore((s) => s.lastOutput);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [pendingTranscription, setPendingTranscription] = useState(null);
   const [exporting, setExporting] = useState(false);
   const [exportPct, setExportPct] = useState(0);
   const [expandedLine, setExpandedLine] = useState(null);
@@ -299,6 +305,53 @@ export default function StoriesEditor({ profiles = [] }) {
       }
     },
     [t],
+  );
+
+  const applyTranscription = useCallback(
+    (entry, mode = 'replace') => {
+      if (exporting) return false;
+      const next = loadStoryState({ cast, lines: tracks }, entry, {
+        unknownSpeakerLabel: t('audiobook.meta_narrator'),
+        mode,
+      });
+      if (!next) return false;
+      const keep = mode === 'append' ? tracks.length : 0;
+      const lines = next.lines.map((line, index) =>
+        index < keep
+          ? tracks[index]
+          : { ...makeTrack(line.character, line.text), profileId: line.profileId ?? null },
+      );
+      setCast(next.cast);
+      setStoryTracks(lines);
+      if (next.replace) {
+        useAppStore.setState({
+          currentProjectId: null,
+          lastOutput: '',
+          lastOutputScript: '',
+          lastOutputChapters: [],
+        });
+      }
+      setActiveTab('script');
+      return true;
+    },
+    [cast, exporting, setCast, setStoryTracks, t, tracks],
+  );
+
+  const pickTranscription = useCallback(
+    (entry) => {
+      if (!hasLongformSource(entry) || exporting) return;
+      const occupied =
+        tracks.some((track) => String(track.text || '').trim()) ||
+        Boolean(splitText.trim()) ||
+        Boolean(lastOutput);
+      if (occupied) {
+        setPendingTranscription(entry);
+        setConflictOpen(true);
+        return;
+      }
+      applyTranscription(entry);
+    },
+    [applyTranscription, exporting, lastOutput, splitText, tracks],
   );
 
   // ── Named projects ──────────────────────────────────────────────────────
@@ -815,6 +868,14 @@ export default function StoriesEditor({ profiles = [] }) {
                 onClick={() => fileInputRef.current && fileInputRef.current.click()}
               >
                 <Upload size={13} aria-hidden="true" /> {t('stories.import')}
+              </Button>
+              <Button
+                size="sm"
+                variant="ghost"
+                disabled={exporting}
+                onClick={() => setPickerOpen(true)}
+              >
+                <Mic size={13} aria-hidden="true" /> {t('stories.from_transcriptions')}
               </Button>
               <Button size="sm" variant="ghost" onClick={toggleSplit}>
                 <Scissors size={13} aria-hidden="true" /> {t('stories.pasteSplit')}
@@ -1493,6 +1554,28 @@ export default function StoriesEditor({ profiles = [] }) {
           </main>
         </TabsContent>
       </Tabs>
+      <TranscriptionPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={pickTranscription}
+      />
+      <LongformImportConfirm
+        open={conflictOpen}
+        onClose={() => {
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+        onReplace={() => {
+          if (pendingTranscription) applyTranscription(pendingTranscription, 'replace');
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+        onAppend={() => {
+          if (pendingTranscription) applyTranscription(pendingTranscription, 'append');
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+      />
     </div>
   );
 }

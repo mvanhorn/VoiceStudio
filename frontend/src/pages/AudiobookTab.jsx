@@ -28,6 +28,8 @@ import AudiobookRecovery from '../components/audiobook/AudiobookRecovery';
 import { useAudiobookLexicon } from '../hooks/useAudiobookLexicon';
 import { parseCastNames, validateScript } from '../utils/audiobookScript';
 import { SAMPLE_AUDIOBOOK_SCRIPT } from '../data/sampleAudiobook';
+import TranscriptionPicker, { LongformImportConfirm } from '../components/TranscriptionPicker';
+import { hasLongformSource, loadAudiobookState } from '../utils/transcriptionToLongform';
 
 // Stable empty-cast fallback: a literal `?? {}` mints a new object every render,
 // which defeats the useMemos keyed on voiceCast (they'd recompute every render).
@@ -205,6 +207,9 @@ export default function AudiobookTab({ profiles = [] }) {
   );
 
   const [importing, setImporting] = useState(false);
+  const [pickerOpen, setPickerOpen] = useState(false);
+  const [conflictOpen, setConflictOpen] = useState(false);
+  const [pendingTranscription, setPendingTranscription] = useState(null);
 
   const onPreview = useCallback(async () => {
     setError('');
@@ -236,6 +241,41 @@ export default function AudiobookTab({ profiles = [] }) {
       }
     },
     [t],
+  );
+
+  const applyTranscription = useCallback(
+    (entry, mode = 'replace') => {
+      if (generating) return false;
+      const next = loadAudiobookState(text, entry, mode);
+      if (!next) return false;
+      setText(next.script);
+      if (next.language) setLanguage(next.language);
+      if (next.replace) {
+        useAppStore.setState({
+          currentProjectId: null,
+          lastOutput: '',
+          lastOutputScript: '',
+          lastOutputChapters: [],
+        });
+      }
+      setPlan(null);
+      setError('');
+      return true;
+    },
+    [generating, setLanguage, setText, text],
+  );
+
+  const pickTranscription = useCallback(
+    (entry) => {
+      if (!hasLongformSource(entry) || generating) return;
+      if (text.trim() || output) {
+        setPendingTranscription(entry);
+        setConflictOpen(true);
+        return;
+      }
+      applyTranscription(entry);
+    },
+    [applyTranscription, generating, output, text],
   );
 
   // Drop the demo story straight into the editor so a first-timer can hit
@@ -494,6 +534,7 @@ export default function AudiobookTab({ profiles = [] }) {
         generating={generating}
         canRun={canRun}
         onImport={onImport}
+        onFromTranscriptions={() => setPickerOpen(true)}
         onLoadSample={loadSample}
         onPreview={onPreview}
         onCreate={onCreate}
@@ -637,6 +678,28 @@ export default function AudiobookTab({ profiles = [] }) {
           )}
         </div>
       )}
+      <TranscriptionPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onPick={pickTranscription}
+      />
+      <LongformImportConfirm
+        open={conflictOpen}
+        onClose={() => {
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+        onReplace={() => {
+          if (pendingTranscription) applyTranscription(pendingTranscription, 'replace');
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+        onAppend={() => {
+          if (pendingTranscription) applyTranscription(pendingTranscription, 'append');
+          setConflictOpen(false);
+          setPendingTranscription(null);
+        }}
+      />
     </div>
   );
 }

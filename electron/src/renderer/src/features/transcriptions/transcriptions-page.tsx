@@ -15,6 +15,8 @@ import { useQuery } from '@tanstack/react-query';
 import { useTranslation } from 'react-i18next';
 import {
   AlertCircleIcon,
+  AudioLinesIcon,
+  BookOpenTextIcon,
   Clock3Icon,
   KeyboardIcon,
   LanguagesIcon,
@@ -59,6 +61,15 @@ import { useNativeShortcut } from '@/hooks/use-native-dictation';
 import { recordActionBreadcrumb } from '@/lib/report-breadcrumb';
 import { saveLocalFile } from '@/lib/local-export';
 import { formatShortcut } from '../../../../../../frontend/src/utils/dictationShortcut';
+import { ConfirmDialog } from '@/features/clone/confirm-dialog';
+import { useLongformSession } from '@/features/longform/longform-session';
+import {
+  audiobookDraftOccupied,
+  canCreateLongformFromTranscription,
+  loadTranscriptionIntoAudiobook,
+  loadTranscriptionIntoStories,
+  storiesDraftOccupied,
+} from './transcription-to-longform';
 
 type TranscriptionMode = 'fast' | 'accurate';
 const TRANSCRIPTION_MODE_KEY = 'voicestudio.transcription.mode';
@@ -74,6 +85,8 @@ function initialTranscriptionMode(): TranscriptionMode {
 export function TranscriptionsPage() {
   const { t, i18n } = useTranslation();
   const navigate = useNavigate();
+  const longform = useLongformSession();
+  const [longformDest, setLongformDest] = useState<'stories' | 'audiobook' | null>(null);
   const live = useMemo(() => new LiveDictation(), []);
   const liveState = useSyncExternalStore(live.subscribe, live.getSnapshot);
   const liveBusy = ['starting', 'recording', 'transcribing'].includes(liveState.stage);
@@ -247,6 +260,33 @@ export function TranscriptionsPage() {
       setEntries(loadTranscriptions());
       setSelectedId(saved.id);
     }, recording.selectedInputId || undefined);
+  const openLongform = (dest: 'stories' | 'audiobook', mode: 'replace' | 'append' = 'replace') => {
+    if (!selected || longform.active) return false;
+    const loaded =
+      dest === 'stories'
+        ? loadTranscriptionIntoStories(selected, {
+            unknownSpeakerLabel: t('audiobook.meta_narrator'),
+            mode,
+          })
+        : loadTranscriptionIntoAudiobook(selected, { mode });
+    if (loaded)
+      runRendererTask(`Use transcription in ${dest}`, () =>
+        navigate({ to: dest === 'stories' ? '/stories' : '/audiobook' }),
+      );
+    return loaded;
+  };
+  const requestLongform = (dest: 'stories' | 'audiobook') => {
+    if (!selected || longform.active) return;
+    const occupied =
+      dest === 'stories'
+        ? storiesDraftOccupied(longform.drafts.stories)
+        : audiobookDraftOccupied(longform.drafts.audiobook);
+    if (occupied) {
+      setLongformDest(dest);
+      return;
+    }
+    openLongform(dest);
+  };
   return (
     <div className="flex h-full min-h-0 flex-col">
       <WorkspaceHeader>
@@ -741,23 +781,69 @@ export function TranscriptionsPage() {
                     </div>
                   </details>
                 )}
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    const language =
-                      selected.language && selected.language !== 'unknown'
-                        ? selected.language
-                        : undefined;
-                    setCloneSetting('text', preferredTranscript(selected));
-                    if (language) setCloneSetting('language', language);
-                    runRendererTask('Reuse transcription in voice cloning', () =>
-                      navigate({ to: '/clone' }),
-                    );
+                <div className="flex flex-wrap gap-2">
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      const language =
+                        selected.language && selected.language !== 'unknown'
+                          ? selected.language
+                          : undefined;
+                      setCloneSetting('text', preferredTranscript(selected));
+                      if (language) setCloneSetting('language', language);
+                      runRendererTask('Reuse transcription in voice cloning', () =>
+                        navigate({ to: '/clone' }),
+                      );
+                    }}
+                  >
+                    <FileTextIcon />
+                    {t('clone.history_reuse')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={
+                      Boolean(longform.active) || !canCreateLongformFromTranscription(selected)
+                    }
+                    title={longform.active ? t('dubWorkspace.storyBusy') : undefined}
+                    onClick={() => requestLongform('stories')}
+                  >
+                    <AudioLinesIcon />
+                    {t('transcriptions.use_in_stories')}
+                  </Button>
+                  <Button
+                    variant="outline"
+                    disabled={
+                      Boolean(longform.active) || !canCreateLongformFromTranscription(selected)
+                    }
+                    title={longform.active ? t('dubWorkspace.storyBusy') : undefined}
+                    onClick={() => requestLongform('audiobook')}
+                  >
+                    <BookOpenTextIcon />
+                    {t('transcriptions.use_in_audiobook')}
+                  </Button>
+                </div>
+                <ConfirmDialog
+                  open={longformDest !== null}
+                  onOpenChange={(open) => {
+                    if (!open) setLongformDest(null);
                   }}
-                >
-                  <FileTextIcon />
-                  {t('clone.history_reuse')}
-                </Button>
+                  title={t(
+                    longformDest === 'audiobook'
+                      ? 'audiobook.from_transcriptions'
+                      : 'stories.from_transcriptions',
+                  )}
+                  description={t('audiobook.import_replace_prompt')}
+                  confirmLabel={t('audiobook.import_replace')}
+                  appendLabel={t('audiobook.import_append')}
+                  cancelLabel={t('audiobook.import_cancel')}
+                  destructive
+                  onConfirm={() => {
+                    if (longformDest) openLongform(longformDest, 'replace');
+                  }}
+                  onAppend={() => {
+                    if (longformDest) openLongform(longformDest, 'append');
+                  }}
+                />
               </article>
             ) : (
               <div className="mx-auto flex min-h-[28rem] max-w-lg flex-col items-center justify-center px-6 text-center">

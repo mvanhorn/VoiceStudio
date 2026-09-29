@@ -489,7 +489,8 @@
     "exportFailed": "Falló la exportación: verifique que el backend se esté ejecutando.",
     "global_speed": "Velocidad",
     "global_speed_hint": "Velocidad de lectura para todas las líneas sin su propia anulación de velocidad",
-    "deleteProjectConfirm": "¿Eliminar este proyecto permanentemente?"
+    "deleteProjectConfirm": "¿Eliminar este proyecto permanentemente?",
+    "from_transcriptions": "Desde transcripciones"
   },
   "common": {
     "stop": "Detener",
@@ -1564,7 +1565,9 @@
     "exported": "Transcripciones exportadas",
     "just_now": "Justo ahora",
     "m_ago": "Hace {{count}}m",
-    "h_ago": "Hace {{count}}h"
+    "h_ago": "Hace {{count}}h",
+    "use_in_stories": "Usar en Historias",
+    "use_in_audiobook": "Usar en Audiolibro"
   },
   "setup": {
     "ready_desc": "Ya puedes crear tu primera voz. Puedes configurar el dictado ahora o más tarde en Ajustes.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Emoción graduada — aplicada solo por el motor IndexTTS2.",
     "emotion_text": "Descripción de emoción",
     "emotion_text_ph": "p. ej. suena agotado y triste",
-    "emotion_alpha": "Intensidad emocional"
+    "emotion_alpha": "Intensidad emocional",
+    "from_transcriptions": "Desde transcripciones",
+    "import_replace_prompt": "Este borrador ya tiene trabajo. ¿Reemplazarlo, añadir la transcripción o cancelar?",
+    "import_replace": "Reemplazar",
+    "import_append": "Añadir",
+    "import_cancel": "Cancelar"
   },
   "voicePanel": {
     "title": "Voz",

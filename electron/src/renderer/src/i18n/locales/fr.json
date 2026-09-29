@@ -333,7 +333,9 @@
     "h_ago": "Il y a {{count}}h",
     "failed": "Échec de la transcription ",
     "missing_model": "Aucun modèle de reconnaissance vocale n'est installé — cette fonction en a besoin pour transcrire l'audio.",
-    "original_transcript": "Transcription originale"
+    "original_transcript": "Transcription originale",
+    "use_in_stories": "Utiliser dans les Histoires",
+    "use_in_audiobook": "Utiliser dans le Livre audio"
   },
   "engineRuntime": {
     "ready": "Prêt",
@@ -1658,7 +1660,8 @@
     "global_speed_apply": "Appliquer à toutes les lignes",
     "deleteProjectConfirm": "Supprimer définitivement ce projet ?",
     "moveUp": "Monter",
-    "moveDown": "Descendre"
+    "moveDown": "Descendre",
+    "from_transcriptions": "Depuis les transcriptions"
   },
   "audiobook": {
     "cast": "Distribution",
@@ -1774,7 +1777,12 @@
     "emotion_text": "Description de l'émotion",
     "emotion_text_ph": "p. ex. sonne épuisé et triste",
     "emotion_alpha": "Force de l'émotion",
-    "lex_duplicate": "Gardez une seule prononciation par mot."
+    "lex_duplicate": "Gardez une seule prononciation par mot.",
+    "from_transcriptions": "Depuis les transcriptions",
+    "import_replace_prompt": "Ce brouillon contient déjà du contenu. Le remplacer, ajouter la transcription, ou annuler ?",
+    "import_replace": "Remplacer",
+    "import_append": "Ajouter",
+    "import_cancel": "Annuler"
   },
   "credentials": {
     "microsoft_key": "Clé du traducteur Microsoft",
@@ -3004,5 +3012,11 @@
     "inbound_brief": "Ce que l'agent doit faire",
     "inbound_brief_placeholder": "Prendre un message : demander le nom, le numéro et l'objet de l'appel.",
     "inbound_twilio_note": "Le numéro, les identifiants et le message d'accueil sont configurés sur la page Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Importer à partir d'une transcription",
+    "search_placeholder": "Rechercher des transcriptions…",
+    "empty": "Aucune transcription pour l'instant. Enregistrez-en un dans l’onglet Transcriptions.",
+    "empty_search": "Aucune transcription ne correspond à votre recherche."
   }
 }

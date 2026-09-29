@@ -90,3 +90,7 @@ Transcriptions checks the active dictation model before enabling **Start dictati
 The recording bubble includes **Pause / Resume**, **Stop**, and **Close**. Pause disables microphone tracks, stops sending new audio, and freezes the elapsed recording timer while preserving the session. Resume continues the same session. Stop (or the recording shortcut) finishes and transcribes, including when paused. Close cancels pending recording/transcription and releases the microphone; text already delivered to another app cannot be retracted. Pausing is manual, not triggered by silence or desktop inactivity.
 
 The Transcriptions page displays the effective recording shortcut and the platform paste shortcut. The floating bubble places its live transcript below the controls in a multiline preview, so controls cannot squeeze the text into a few characters.
+
+### From dictation to narration
+
+A finished transcription can become a Stories or Audiobook draft without copying it by hand. On the transcription, **Use in Stories** turns timed segments into lines (one Narrator character when there are no speaker labels) and **Use in Audiobook** puts the preferred transcript into the manuscript. Stories and Audiobook also offer **From transcriptions**, which opens the same local history. If that draft already has work, you can replace it, append the new text, or cancel. The history row is left unchanged.

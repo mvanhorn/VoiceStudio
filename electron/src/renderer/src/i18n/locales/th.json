@@ -331,7 +331,9 @@
     "h_ago": "{{count}}ชม. ที่แล้ว",
     "failed": "การถอดเสียงล้มเหลว",
     "missing_model": "ยังไม่ได้ติดตั้งโมเดลแปลงเสียงเป็นข้อความ — ฟีเจอร์นี้ต้องใช้โมเดลเพื่อถอดเสียง",
-    "original_transcript": "ข้อความถอดเสียงต้นฉบับ"
+    "original_transcript": "ข้อความถอดเสียงต้นฉบับ",
+    "use_in_stories": "ใช้ในเรื่องราว",
+    "use_in_audiobook": "ใช้ในหนังสือเสียง"
   },
   "engineRuntime": {
     "ready": "พร้อม",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "ใช้กับทุกบรรทัด",
     "deleteProjectConfirm": "ลบโปรเจ็กต์นี้อย่างถาวรหรือไม่",
     "moveUp": "เลื่อนขึ้น",
-    "moveDown": "เลื่อนลง"
+    "moveDown": "เลื่อนลง",
+    "from_transcriptions": "จากบทถอดเสียง"
   },
   "audiobook": {
     "cast": "นักพากย์",
@@ -1772,7 +1775,12 @@
     "emotion_text": "คำอธิบายอารมณ์",
     "emotion_text_ph": "เช่น ฟังดูเหนื่อยและเศร้า",
     "emotion_alpha": "ความเข้มของอารมณ์",
-    "lex_duplicate": "ระบุการออกเสียงเพียงแบบเดียวต่อคำ"
+    "lex_duplicate": "ระบุการออกเสียงเพียงแบบเดียวต่อคำ",
+    "from_transcriptions": "จากบทถอดเสียง",
+    "import_replace_prompt": "ฉบับร่างนี้มีงานอยู่แล้ว ต้องการแทนที่ ต่อท้ายบทถอดเสียง หรือยกเลิก?",
+    "import_replace": "แทนที่",
+    "import_append": "ต่อท้าย",
+    "import_cancel": "ยกเลิก"
   },
   "credentials": {
     "microsoft_key": "คีย์นักแปลของ Microsoft",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "สิ่งที่เอเจนต์ควรทำ",
     "inbound_brief_placeholder": "รับข้อความ: ถามชื่อ หมายเลขโทรศัพท์ และเรื่องที่ติดต่อมา",
     "inbound_twilio_note": "หมายเลข ข้อมูลรับรอง และคำทักทายตั้งค่าได้ที่หน้า Twilio"
+  },
+  "transcriptionPicker": {
+    "title": "นำเข้าจากการถอดเสียง",
+    "search_placeholder": "ค้นหาข้อความถอดเสียง...",
+    "empty": "ยังไม่มีการถอดเสียงเป็นคำ บันทึกหนึ่งรายการในแท็บการถอดเสียง",
+    "empty_search": "ไม่มีการถอดเสียงที่ตรงกับการค้นหาของคุณ"
   }
 }

@@ -158,7 +158,8 @@
     "chars": "{{count}} chars",
     "exportDone": "Audiobook downloaded",
     "exportFailed": "Export failed — check the backend is running.",
-    "deleteProjectConfirm": "Delete this project permanently?"
+    "deleteProjectConfirm": "Delete this project permanently?",
+    "from_transcriptions": "From transcriptions"
   },
   "nav": {
     "launchpad": "Launchpad",
@@ -293,7 +294,12 @@
     "emotion_help": "Graded emotion — applied by the IndexTTS2 engine only.",
     "emotion_text": "Emotion description",
     "emotion_text_ph": "e.g. sounds exhausted and sad",
-    "emotion_alpha": "Emotion strength"
+    "emotion_alpha": "Emotion strength",
+    "from_transcriptions": "From transcriptions",
+    "import_replace_prompt": "This draft already has work in it. Replace it, append the transcription, or cancel?",
+    "import_replace": "Replace",
+    "import_append": "Append",
+    "import_cancel": "Cancel"
   },
   "launchpad": {
     "greeting": "hello there",
@@ -1821,7 +1827,9 @@
     "exported": "Exported transcriptions",
     "just_now": "Just now",
     "m_ago": "{{count}}m ago",
-    "h_ago": "{{count}}h ago"
+    "h_ago": "{{count}}h ago",
+    "use_in_stories": "Use in Stories",
+    "use_in_audiobook": "Use in Audiobook"
   },
   "transcriptionPicker": {
     "title": "Import from a transcription",

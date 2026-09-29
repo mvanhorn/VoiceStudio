@@ -331,7 +331,9 @@
     "h_ago": "{{count}}jam yang lalu",
     "failed": "Transkripsi gagal",
     "missing_model": "Tidak ada model ucapan-ke-teks yang terpasang — fitur ini membutuhkannya untuk mentranskripsi audio.",
-    "original_transcript": "Transkrip asli"
+    "original_transcript": "Transkrip asli",
+    "use_in_stories": "Gunakan di Cerita",
+    "use_in_audiobook": "Gunakan di Buku audio"
   },
   "engineRuntime": {
     "ready": "Siap",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Gunakan untuk semua baris",
     "deleteProjectConfirm": "Hapus proyek ini secara permanen?",
     "moveUp": "Pindah ke atas",
-    "moveDown": "Pindah ke bawah"
+    "moveDown": "Pindah ke bawah",
+    "from_transcriptions": "Dari transkripsi"
   },
   "audiobook": {
     "cast": "Pemeran",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Deskripsi emosi",
     "emotion_text_ph": "mis. terdengar lelah dan sedih",
     "emotion_alpha": "Kekuatan emosi",
-    "lex_duplicate": "Gunakan satu pelafalan untuk setiap kata."
+    "lex_duplicate": "Gunakan satu pelafalan untuk setiap kata.",
+    "from_transcriptions": "Dari transkripsi",
+    "import_replace_prompt": "Draf ini sudah berisi pekerjaan. Ganti, tambahkan transkripsi, atau batal?",
+    "import_replace": "Ganti",
+    "import_append": "Tambahkan",
+    "import_cancel": "Batal"
   },
   "credentials": {
     "microsoft_key": "Kunci Penerjemah Microsoft",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Apa yang harus dilakukan agen",
     "inbound_brief_placeholder": "Terima pesan: tanyakan nama, nomor, dan keperluan mereka.",
     "inbound_twilio_note": "Nomor, kredensial, dan sapaan diatur di halaman Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Impor dari transkripsi",
+    "search_placeholder": "Telusuri transkripsi…",
+    "empty": "Belum ada transkripsi. Rekam satu di tab Transkripsi.",
+    "empty_search": "Tidak ada transkripsi yang cocok dengan penelusuran Anda."
   }
 }

@@ -331,7 +331,9 @@
     "h_ago": "{{count}}h sedan",
     "failed": "Transkription misslyckades",
     "missing_model": "Ingen tal-till-text-modell är installerad — den här funktionen behöver en för att transkribera ljud.",
-    "original_transcript": "Ursprunglig transkription"
+    "original_transcript": "Ursprunglig transkription",
+    "use_in_stories": "Använd i Berättelser",
+    "use_in_audiobook": "Använd i Ljudbok"
   },
   "engineRuntime": {
     "ready": "Klar",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Använd för alla rader",
     "deleteProjectConfirm": "Ta bort projektet permanent?",
     "moveUp": "Flytta upp",
-    "moveDown": "Flytta ned"
+    "moveDown": "Flytta ned",
+    "from_transcriptions": "Från transkriptioner"
   },
   "audiobook": {
     "cast": "Rollbesättning",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Emotionsbeskrivning",
     "emotion_text_ph": "t.ex. låter uttömd och ledsen",
     "emotion_alpha": "Emotionsstyrka",
-    "lex_duplicate": "Ange ett uttal per ord."
+    "lex_duplicate": "Ange ett uttal per ord.",
+    "from_transcriptions": "Från transkriptioner",
+    "import_replace_prompt": "Det här utkastet har redan innehåll. Ersätt det, lägg till transkriptionen eller avbryt?",
+    "import_replace": "Ersätt",
+    "import_append": "Lägg till",
+    "import_cancel": "Avbryt"
   },
   "credentials": {
     "microsoft_key": "Microsoft Translator-nyckel",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Vad agenten ska göra",
     "inbound_brief_placeholder": "Ta emot ett meddelande: fråga efter namn, nummer och vad det gäller.",
     "inbound_twilio_note": "Numret, autentiseringsuppgifterna och hälsningen ställs in på Twilio-sidan."
+  },
+  "transcriptionPicker": {
+    "title": "Importera från en transkription",
+    "search_placeholder": "Sök efter transkriptioner...",
+    "empty": "Inga transkriptioner än. Spela in en på fliken Transkriptioner.",
+    "empty_search": "Inga transkriptioner matchar din sökning."
   }
 }

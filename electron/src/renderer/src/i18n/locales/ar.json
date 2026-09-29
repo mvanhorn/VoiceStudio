@@ -339,7 +339,9 @@
     "h_ago": "{{count}}h منذ",
     "failed": "فشل النسخ",
     "missing_model": "لا يوجد نموذج لتحويل الكلام إلى نص مثبّت — تحتاج هذه الميزة إلى نموذج لتفريغ الصوت.",
-    "original_transcript": "النص الأصلي"
+    "original_transcript": "النص الأصلي",
+    "use_in_stories": "استخدمه في القصص",
+    "use_in_audiobook": "استخدمه في الكتاب الصوتي"
   },
   "engineRuntime": {
     "ready": "جاهز",
@@ -1664,7 +1666,8 @@
     "global_speed_apply": "استخدمها لكل الأسطر",
     "deleteProjectConfirm": "هل تريد حذف هذا المشروع نهائيًا؟",
     "moveUp": "نقل لأعلى",
-    "moveDown": "نقل لأسفل"
+    "moveDown": "نقل لأسفل",
+    "from_transcriptions": "من النصوص المكتوبة"
   },
   "audiobook": {
     "cast": "طاقم الأصوات",
@@ -1780,7 +1783,12 @@
     "emotion_text": "وصف العاطفة",
     "emotion_text_ph": "على سبيل المثال يبدو متعباً وحزيناً",
     "emotion_alpha": "قوة العاطفة",
-    "lex_duplicate": "احتفظ بنطق واحد لكل كلمة."
+    "lex_duplicate": "احتفظ بنطق واحد لكل كلمة.",
+    "from_transcriptions": "من النصوص المكتوبة",
+    "import_replace_prompt": "يحتوي هذا المسودة على عمل بالفعل. هل تريد استبداله أو إلحاق النص أو الإلغاء؟",
+    "import_replace": "استبدال",
+    "import_append": "إلحاق",
+    "import_cancel": "إلغاء"
   },
   "credentials": {
     "microsoft_key": "مفتاح مترجم مايكروسوفت",
@@ -3010,5 +3018,11 @@
     "inbound_brief": "ما الذي يجب أن يفعله الوكيل",
     "inbound_brief_placeholder": "دوّن رسالة: اطلب الاسم والرقم وموضوع الاتصال.",
     "inbound_twilio_note": "يتم ضبط الرقم وبيانات الاعتماد والتحية في صفحة Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "استيراد من النسخ",
+    "search_placeholder": "بحث في النسخ...",
+    "empty": "لا يوجد نسخ بعد. سجل واحدة في علامة التبويب النسخ.",
+    "empty_search": "لا توجد نسخ تطابق بحثك."
   }
 }

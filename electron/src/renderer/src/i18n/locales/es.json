@@ -333,7 +333,9 @@
     "h_ago": "Hace {{count}}h",
     "failed": "Error de transcripción",
     "missing_model": "No hay ningún modelo de voz a texto instalado — esta función necesita uno para transcribir audio.",
-    "original_transcript": "Transcripción original"
+    "original_transcript": "Transcripción original",
+    "use_in_stories": "Usar en Historias",
+    "use_in_audiobook": "Usar en Audiolibro"
   },
   "engineRuntime": {
     "ready": "Listo",
@@ -1658,7 +1660,8 @@
     "global_speed_apply": "Usar en todas las líneas",
     "deleteProjectConfirm": "¿Eliminar este proyecto permanentemente?",
     "moveUp": "Subir",
-    "moveDown": "Bajar"
+    "moveDown": "Bajar",
+    "from_transcriptions": "Desde transcripciones"
   },
   "audiobook": {
     "cast": "Reparto",
@@ -1774,7 +1777,12 @@
     "emotion_text": "Descripción de emoción",
     "emotion_text_ph": "p. ej. suena agotado y triste",
     "emotion_alpha": "Intensidad emocional",
-    "lex_duplicate": "Usa una sola pronunciación por palabra."
+    "lex_duplicate": "Usa una sola pronunciación por palabra.",
+    "from_transcriptions": "Desde transcripciones",
+    "import_replace_prompt": "Este borrador ya tiene trabajo. ¿Reemplazarlo, añadir la transcripción o cancelar?",
+    "import_replace": "Reemplazar",
+    "import_append": "Añadir",
+    "import_cancel": "Cancelar"
   },
   "credentials": {
     "microsoft_key": "Clave del traductor de Microsoft",
@@ -3004,5 +3012,11 @@
     "inbound_brief": "Qué debe hacer el agente",
     "inbound_brief_placeholder": "Toma un mensaje: pide su nombre, número y el motivo de la llamada.",
     "inbound_twilio_note": "El número, las credenciales y el saludo se configuran en la página de Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Importar desde una transcripción",
+    "search_placeholder": "Buscar transcripciones…",
+    "empty": "Aún no hay transcripciones. Graba uno en la pestaña Transcripciones.",
+    "empty_search": "Ninguna transcripción coincide con su búsqueda."
   }
 }

@@ -656,7 +656,9 @@
     "h_ago": "{{count}}h ago",
     "failed": "Transcription failed",
     "missing_model": "No speech-to-text model is installed — this feature needs one to transcribe audio.",
-    "original_transcript": "Original transcript"
+    "original_transcript": "Original transcript",
+    "use_in_stories": "Use in Stories",
+    "use_in_audiobook": "Use in Audiobook"
   },
   "engineRuntime": {
     "ready": "Ready",
@@ -1751,7 +1753,8 @@
     "exportFailed": "Export failed — check the backend is running.",
     "deleteProjectConfirm": "Delete this project permanently?",
     "moveUp": "Move up",
-    "moveDown": "Move down"
+    "moveDown": "Move down",
+    "from_transcriptions": "From transcriptions"
   },
   "audiobook": {
     "cast": "Cast",
@@ -1867,7 +1870,12 @@
     "emotion_text": "Emotion description",
     "emotion_text_ph": "e.g. sounds exhausted and sad",
     "emotion_alpha": "Emotion strength",
-    "lex_duplicate": "Keep one pronunciation per word."
+    "lex_duplicate": "Keep one pronunciation per word.",
+    "from_transcriptions": "From transcriptions",
+    "import_replace_prompt": "This draft already has work in it. Replace it, append the transcription, or cancel?",
+    "import_replace": "Replace",
+    "import_append": "Append",
+    "import_cancel": "Cancel"
   },
   "credentials": {
     "microsoft_key": "Microsoft Translator Key",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "What the agent should do",
     "inbound_brief_placeholder": "Take a message: ask for their name, number and what it is about.",
     "inbound_twilio_note": "The number, credentials and greeting are set on the Twilio page."
+  },
+  "transcriptionPicker": {
+    "title": "Import from a transcription",
+    "search_placeholder": "Search transcriptions…",
+    "empty": "No transcriptions yet. Record one in the Transcriptions tab.",
+    "empty_search": "No transcriptions match your search."
   }
 }

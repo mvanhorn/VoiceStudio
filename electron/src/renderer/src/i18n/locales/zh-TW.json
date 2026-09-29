@@ -331,7 +331,9 @@
     "h_ago": "{{count}} 小時前",
     "failed": "轉錄失敗：",
     "missing_model": "尚未安裝語音轉文字模型 — 此功能需要一個模型來轉錄音訊。",
-    "original_transcript": "原始轉錄"
+    "original_transcript": "原始轉錄",
+    "use_in_stories": "在劇本中使用",
+    "use_in_audiobook": "在有聲書中使用"
   },
   "engineRuntime": {
     "ready": "準備好",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "套用到所有行",
     "deleteProjectConfirm": "要永久刪除此專案嗎？",
     "moveUp": "上移",
-    "moveDown": "下移"
+    "moveDown": "下移",
+    "from_transcriptions": "從轉錄匯入"
   },
   "audiobook": {
     "cast": "配音角色",
@@ -1772,7 +1775,12 @@
     "emotion_text": "情感描述",
     "emotion_text_ph": "例如 聽起來很疲勞和悲傷",
     "emotion_alpha": "情感強度",
-    "lex_duplicate": "每個詞只保留一種發音。"
+    "lex_duplicate": "每個詞只保留一種發音。",
+    "from_transcriptions": "從轉錄匯入",
+    "import_replace_prompt": "此草稿已有內容。要取代、附加轉錄，還是取消？",
+    "import_replace": "取代",
+    "import_append": "附加",
+    "import_cancel": "取消"
   },
   "credentials": {
     "microsoft_key": "微軟翻譯金鑰",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "助理需要做什麼",
     "inbound_brief_placeholder": "記錄留言：詢問姓名、電話號碼以及來電事由。",
     "inbound_twilio_note": "號碼、憑證與問候語會在 Twilio 頁面設定。"
+  },
+  "transcriptionPicker": {
+    "title": "從轉錄導入",
+    "search_placeholder": "搜尋轉錄...",
+    "empty": "還沒有轉錄。在“轉錄”選項卡中記錄一個。",
+    "empty_search": "沒有與您的搜尋相符的轉錄。"
   }
 }

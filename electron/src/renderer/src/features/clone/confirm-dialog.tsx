@@ -17,8 +17,10 @@ interface ConfirmDialogProps {
   description: string;
   confirmLabel?: string;
   cancelLabel?: string;
+  appendLabel?: string;
   destructive?: boolean;
   onConfirm: () => void | Promise<void>;
+  onAppend?: () => void | Promise<void>;
   onCancel?: () => void | Promise<void>;
 }
 
@@ -29,14 +31,16 @@ export function ConfirmDialog({
   description,
   confirmLabel,
   cancelLabel,
+  appendLabel,
   destructive = true,
   onConfirm,
+  onAppend,
   onCancel,
 }: ConfirmDialogProps) {
   const { t } = useTranslation();
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent showCloseButton={false}>
+      <DialogContent showCloseButton={false} className={onAppend ? 'sm:max-w-md' : undefined}>
         <DialogHeader>
           <DialogTitle>{title}</DialogTitle>
           <DialogDescription>{description}</DialogDescription>
@@ -45,6 +49,17 @@ export function ConfirmDialog({
           <DialogClose render={<Button variant="outline" onClick={() => void onCancel?.()} />}>
             {cancelLabel ?? t('common.cancel')}
           </DialogClose>
+          {onAppend ? (
+            <Button
+              variant="outline"
+              onClick={async () => {
+                await onAppend();
+                onOpenChange(false);
+              }}
+            >
+              {appendLabel ?? t('audiobook.import_append')}
+            </Button>
+          ) : null}
           <Button
             variant={destructive ? 'destructive' : 'default'}
             onClick={async () => {

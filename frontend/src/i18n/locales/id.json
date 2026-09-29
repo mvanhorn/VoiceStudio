@@ -489,7 +489,8 @@
     "exportFailed": "Ekspor gagal — periksa apakah backend sedang berjalan.",
     "global_speed": "Kecepatan",
     "global_speed_hint": "Kecepatan membaca untuk semua lini tanpa mengesampingkan kecepatannya sendiri",
-    "deleteProjectConfirm": "Hapus proyek ini secara permanen?"
+    "deleteProjectConfirm": "Hapus proyek ini secara permanen?",
+    "from_transcriptions": "Dari transkripsi"
   },
   "common": {
     "stop": "Berhenti",
@@ -1564,7 +1565,9 @@
     "exported": "Transkripsi yang diekspor",
     "just_now": "Baru saja",
     "m_ago": "{{count}}m yang lalu",
-    "h_ago": "{{count}}jam yang lalu"
+    "h_ago": "{{count}}jam yang lalu",
+    "use_in_stories": "Gunakan di Cerita",
+    "use_in_audiobook": "Gunakan di Buku audio"
   },
   "setup": {
     "ready_desc": "Anda siap membuat suara pertama. Atur dikte sekarang atau nanti di Pengaturan.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Emosi berjenjang — diterapkan hanya oleh mesin IndexTTS2.",
     "emotion_text": "Deskripsi emosi",
     "emotion_text_ph": "mis. terdengar lelah dan sedih",
-    "emotion_alpha": "Kekuatan emosi"
+    "emotion_alpha": "Kekuatan emosi",
+    "from_transcriptions": "Dari transkripsi",
+    "import_replace_prompt": "Draf ini sudah berisi pekerjaan. Ganti, tambahkan transkripsi, atau batal?",
+    "import_replace": "Ganti",
+    "import_append": "Tambahkan",
+    "import_cancel": "Batal"
   },
   "voicePanel": {
     "title": "Suara",

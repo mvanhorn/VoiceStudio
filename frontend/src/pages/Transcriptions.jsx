@@ -9,7 +9,18 @@
  */
 import React, { useState, useCallback, useMemo, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Mic, Copy, Trash2, Search, Clock, Languages, FileText, Download } from 'lucide-react';
+import {
+  Mic,
+  Copy,
+  Trash2,
+  Search,
+  Clock,
+  Languages,
+  FileText,
+  Download,
+  AudioLines,
+  BookOpen,
+} from 'lucide-react';
 import { Button } from '../ui';
 import { detectPlatform } from '../utils/micError';
 import { useDictationReadiness } from '../hooks/useDictationReadiness';
@@ -24,6 +35,13 @@ import {
   TRANSCRIPTIONS_KEY,
   TRANSCRIPTION_EVENT,
 } from '../utils/transcriptionsStore';
+import { useAppStore } from '../store';
+import { LongformImportConfirm } from '../components/TranscriptionPicker';
+import {
+  hasLongformSource,
+  loadAudiobookState,
+  loadStoryState,
+} from '../utils/transcriptionToLongform';
 
 function saveTranscriptions(list) {
   localStorage.setItem(TRANSCRIPTIONS_KEY, JSON.stringify(list));
@@ -69,6 +87,7 @@ export default function TranscriptionsPage() {
   const [transcriptions, setTranscriptions] = useState(loadTranscriptions);
   const [search, setSearch] = useState('');
   const [selectedId, setSelectedId] = useState(null);
+  const [longformDest, setLongformDest] = useState(null);
   const { info: shortcut } = useEffectiveDictationShortcut();
   const readiness = useDictationReadiness();
   const checkReadiness = readiness.check;
@@ -113,6 +132,81 @@ export default function TranscriptionsPage() {
   const selected = useMemo(
     () => transcriptions.find((t) => t.id === selectedId),
     [transcriptions, selectedId],
+  );
+
+  const applyLongform = useCallback(
+    (dest, mode = 'replace') => {
+      if (!selected) return false;
+      const store = useAppStore.getState();
+      if (dest === 'stories') {
+        const next = loadStoryState({ cast: store.cast, lines: store.storyTracks }, selected, {
+          unknownSpeakerLabel: t('audiobook.meta_narrator'),
+          mode,
+        });
+        if (!next) return false;
+        const existing = mode === 'append' ? store.storyTracks : [];
+        const stamp = Date.now();
+        const tracks = next.lines.map((line, index) =>
+          index < existing.length
+            ? existing[index]
+            : {
+                id: stamp + index,
+                character: line.character,
+                text: line.text,
+                profileId: line.profileId ?? null,
+                emotion: null,
+                speed: null,
+                generating: false,
+                audioUrl: null,
+              },
+        );
+        store.setCast(next.cast);
+        store.setStoryTracks(tracks);
+        if (next.replace) {
+          useAppStore.setState({
+            currentProjectId: null,
+            lastOutput: '',
+            lastOutputScript: '',
+            lastOutputChapters: [],
+          });
+        }
+        store.setMode('stories');
+        return true;
+      }
+      const next = loadAudiobookState(store.script, selected, mode);
+      if (!next) return false;
+      store.setScript(next.script);
+      if (next.language) store.setOutputPrefs({ language: next.language });
+      if (next.replace) {
+        useAppStore.setState({
+          currentProjectId: null,
+          lastOutput: '',
+          lastOutputScript: '',
+          lastOutputChapters: [],
+        });
+      }
+      store.setMode('audiobook');
+      return true;
+    },
+    [selected, t],
+  );
+
+  const requestLongform = useCallback(
+    (dest) => {
+      if (!selected || !hasLongformSource(selected)) return;
+      const store = useAppStore.getState();
+      const occupied =
+        dest === 'stories'
+          ? store.storyTracks.some((track) => String(track.text || '').trim()) ||
+            Boolean(store.lastOutput)
+          : Boolean(String(store.script || '').trim()) || Boolean(store.lastOutput);
+      if (occupied) {
+        setLongformDest(dest);
+        return;
+      }
+      applyLongform(dest);
+    },
+    [selected, applyLongform],
   );
 
   const copyText = useCallback(
@@ -378,6 +472,22 @@ export default function TranscriptionsPage() {
                 <Button size="sm" variant="ghost" onClick={() => copyText(selected.text)}>
                   <Copy size={12} /> {t('transcriptions.copy')}
                 </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!hasLongformSource(selected)}
+                  onClick={() => requestLongform('stories')}
+                >
+                  <AudioLines size={12} /> {t('transcriptions.use_in_stories')}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={!hasLongformSource(selected)}
+                  onClick={() => requestLongform('audiobook')}
+                >
+                  <BookOpen size={12} /> {t('transcriptions.use_in_audiobook')}
+                </Button>
                 <Button size="sm" variant="ghost" onClick={() => deleteEntry(selected.id)}>
                   <Trash2 size={12} /> {t('transcriptions.delete')}
                 </Button>
@@ -409,6 +519,18 @@ export default function TranscriptionsPage() {
           </div>
         )}
       </div>
+      <LongformImportConfirm
+        open={Boolean(longformDest)}
+        onClose={() => setLongformDest(null)}
+        onReplace={() => {
+          if (longformDest) applyLongform(longformDest, 'replace');
+          setLongformDest(null);
+        }}
+        onAppend={() => {
+          if (longformDest) applyLongform(longformDest, 'append');
+          setLongformDest(null);
+        }}
+      />
     </div>
   );
 }

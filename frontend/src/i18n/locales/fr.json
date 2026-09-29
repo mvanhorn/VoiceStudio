@@ -489,7 +489,8 @@
     "exportFailed": "Échec de l'exportation : vérifiez que le backend est en cours d'exécution.",
     "global_speed": "Vitesse",
     "global_speed_hint": "Vitesse de lecture pour toutes les lignes sans leur propre priorité de vitesse",
-    "deleteProjectConfirm": "Supprimer définitivement ce projet ?"
+    "deleteProjectConfirm": "Supprimer définitivement ce projet ?",
+    "from_transcriptions": "Depuis les transcriptions"
   },
   "common": {
     "stop": "Arrêter",
@@ -1564,7 +1565,9 @@
     "exported": "Transcriptions exportées",
     "just_now": "Juste maintenant",
     "m_ago": "il y a {{count}} m",
-    "h_ago": "Il y a {{count}}h"
+    "h_ago": "Il y a {{count}}h",
+    "use_in_stories": "Utiliser dans les Histoires",
+    "use_in_audiobook": "Utiliser dans le Livre audio"
   },
   "setup": {
     "ready_desc": "Vous pouvez créer votre première voix. Configurez la dictée maintenant ou plus tard dans les paramètres.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Émotion graduée — appliquée par le moteur IndexTTS2 uniquement.",
     "emotion_text": "Description de l'émotion",
     "emotion_text_ph": "p. ex. sonne épuisé et triste",
-    "emotion_alpha": "Force de l'émotion"
+    "emotion_alpha": "Force de l'émotion",
+    "from_transcriptions": "Depuis les transcriptions",
+    "import_replace_prompt": "Ce brouillon contient déjà du contenu. Le remplacer, ajouter la transcription, ou annuler ?",
+    "import_replace": "Remplacer",
+    "import_append": "Ajouter",
+    "import_cancel": "Annuler"
   },
   "voicePanel": {
     "title": "Voix",

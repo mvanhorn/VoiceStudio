@@ -331,7 +331,9 @@
     "h_ago": "{{count}}h पहले",
     "failed": "प्रतिलेखन विफल",
     "missing_model": "कोई स्पीच-टू-टेक्स्ट मॉडल इंस्टॉल नहीं है — ऑडियो ट्रांसक्राइब करने के लिए इस सुविधा को एक मॉडल चाहिए।",
-    "original_transcript": "मूल प्रतिलेख"
+    "original_transcript": "मूल प्रतिलेख",
+    "use_in_stories": "कहानियों में उपयोग करें",
+    "use_in_audiobook": "ऑडियोबुक में उपयोग करें"
   },
   "engineRuntime": {
     "ready": "तैयार",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "सभी पंक्तियों के लिए उपयोग करें",
     "deleteProjectConfirm": "इस प्रोजेक्ट को स्थायी रूप से मिटाएँ?",
     "moveUp": "ऊपर ले जाएँ",
-    "moveDown": "नीचे ले जाएँ"
+    "moveDown": "नीचे ले जाएँ",
+    "from_transcriptions": "ट्रांस्क्रिप्शन से"
   },
   "audiobook": {
     "cast": "कास्ट",
@@ -1772,7 +1775,12 @@
     "emotion_text": "भावना विवरण",
     "emotion_text_ph": "जैसे। थका हुआ और उदास लगता है",
     "emotion_alpha": "भावना की शक्ति",
-    "lex_duplicate": "हर शब्द के लिए एक ही उच्चारण रखें।"
+    "lex_duplicate": "हर शब्द के लिए एक ही उच्चारण रखें।",
+    "from_transcriptions": "ट्रांस्क्रिप्शन से",
+    "import_replace_prompt": "इस ड्राफ्ट में पहले से काम है। इसे बदलें, ट्रांस्क्रिप्शन जोड़ें, या रद्द करें?",
+    "import_replace": "बदलें",
+    "import_append": "जोड़ें",
+    "import_cancel": "रद्द करें"
   },
   "credentials": {
     "microsoft_key": "माइक्रोसॉफ्ट अनुवादक कुंजी",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "एजेंट को क्या करना चाहिए",
     "inbound_brief_placeholder": "एक संदेश लें: उनका नाम, नंबर और कारण पूछें।",
     "inbound_twilio_note": "नंबर, क्रेडेंशियल और अभिवादन Twilio पेज पर सेट किए जाते हैं।"
+  },
+  "transcriptionPicker": {
+    "title": "प्रतिलेखन से आयात करें",
+    "search_placeholder": "प्रतिलेखन खोजें…",
+    "empty": "अभी तक कोई प्रतिलेखन नहीं. ट्रांसक्रिप्शन टैब में एक रिकॉर्ड करें।",
+    "empty_search": "कोई भी प्रतिलेखन आपकी खोज से मेल नहीं खाता."
   }
 }

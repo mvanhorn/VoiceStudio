@@ -331,7 +331,9 @@
     "h_ago": "{{count}}giờ trước",
     "failed": "Phiên âm không thành công",
     "missing_model": "Chưa cài đặt mô hình chuyển giọng nói thành văn bản — tính năng này cần một mô hình để phiên âm.",
-    "original_transcript": "Bản chép lời gốc"
+    "original_transcript": "Bản chép lời gốc",
+    "use_in_stories": "Dùng trong Kịch bản",
+    "use_in_audiobook": "Dùng trong Sách nói"
   },
   "engineRuntime": {
     "ready": "Sẵn sàng",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Dùng cho mọi dòng",
     "deleteProjectConfirm": "Xóa vĩnh viễn dự án này?",
     "moveUp": "Di chuyển lên",
-    "moveDown": "Di chuyển xuống"
+    "moveDown": "Di chuyển xuống",
+    "from_transcriptions": "Từ bản chép lời"
   },
   "audiobook": {
     "cast": "Dàn giọng",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Mô tả cảm xúc",
     "emotion_text_ph": "ví dụ: nghe vẻ mệt mỏi và buồn",
     "emotion_alpha": "Độ mạnh của cảm xúc",
-    "lex_duplicate": "Chỉ dùng một cách phát âm cho mỗi từ."
+    "lex_duplicate": "Chỉ dùng một cách phát âm cho mỗi từ.",
+    "from_transcriptions": "Từ bản chép lời",
+    "import_replace_prompt": "Bản nháp này đã có nội dung. Thay thế, thêm bản chép lời, hay hủy?",
+    "import_replace": "Thay thế",
+    "import_append": "Thêm",
+    "import_cancel": "Hủy"
   },
   "credentials": {
     "microsoft_key": "Khóa dịch của Microsoft",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Trợ lý cần làm gì",
     "inbound_brief_placeholder": "Ghi lại lời nhắn: hỏi tên, số điện thoại và nội dung cần trao đổi.",
     "inbound_twilio_note": "Số điện thoại, thông tin xác thực và lời chào được thiết lập trên trang Twilio."
+  },
+  "transcriptionPicker": {
+    "title": "Nhập từ bản chép lời",
+    "search_placeholder": "Tìm kiếm bản chép lời…",
+    "empty": "Chưa có phiên âm nào. Ghi lại một bản ghi trong tab Bản ghi.",
+    "empty_search": "Không có phiên âm nào phù hợp với tìm kiếm của bạn."
   }
 }

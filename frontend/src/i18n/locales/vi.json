@@ -489,7 +489,8 @@
     "exportFailed": "Xuất không thành công - kiểm tra xem chương trình phụ trợ có đang chạy không.",
     "global_speed": "Tốc độ",
     "global_speed_hint": "Tốc độ đọc cho tất cả các dòng mà không cần ghi đè tốc độ riêng",
-    "deleteProjectConfirm": "Xóa vĩnh viễn dự án này?"
+    "deleteProjectConfirm": "Xóa vĩnh viễn dự án này?",
+    "from_transcriptions": "Từ bản chép lời"
   },
   "common": {
     "stop": "Dừng lại",
@@ -1564,7 +1565,9 @@
     "exported": "Bản chép lời đã xuất",
     "just_now": "Vừa rồi",
     "m_ago": "{{count}}phút trước",
-    "h_ago": "{{count}}giờ trước"
+    "h_ago": "{{count}}giờ trước",
+    "use_in_stories": "Dùng trong Kịch bản",
+    "use_in_audiobook": "Dùng trong Sách nói"
   },
   "setup": {
     "ready_desc": "Bạn đã sẵn sàng tạo giọng nói đầu tiên. Có thể thiết lập nhập liệu bằng giọng nói ngay hoặc sau này trong Cài đặt.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Cảm xúc dần dần — chỉ được áp dụng bởi công cụ IndexTTS2.",
     "emotion_text": "Mô tả cảm xúc",
     "emotion_text_ph": "ví dụ: nghe vẻ mệt mỏi và buồn",
-    "emotion_alpha": "Độ mạnh của cảm xúc"
+    "emotion_alpha": "Độ mạnh của cảm xúc",
+    "from_transcriptions": "Từ bản chép lời",
+    "import_replace_prompt": "Bản nháp này đã có nội dung. Thay thế, thêm bản chép lời, hay hủy?",
+    "import_replace": "Thay thế",
+    "import_append": "Thêm",
+    "import_cancel": "Hủy"
   },
   "voicePanel": {
     "title": "Giọng nói",

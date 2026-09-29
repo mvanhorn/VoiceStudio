@@ -489,7 +489,8 @@
     "exportFailed": "Exporteren mislukt. Controleer of de backend actief is.",
     "global_speed": "Snelheid",
     "global_speed_hint": "Leessnelheid voor alle lijnen zonder hun eigen snelheidsoverschrijving",
-    "deleteProjectConfirm": "Dit project permanent verwijderen?"
+    "deleteProjectConfirm": "Dit project permanent verwijderen?",
+    "from_transcriptions": "Uit transcripties"
   },
   "common": {
     "stop": "Stop",
@@ -1564,7 +1565,9 @@
     "exported": "Geëxporteerde transcripties",
     "just_now": "Zojuist",
     "m_ago": "{{count}}m geleden",
-    "h_ago": "{{count}}u geleden"
+    "h_ago": "{{count}}u geleden",
+    "use_in_stories": "In Verhalen gebruiken",
+    "use_in_audiobook": "In Audioboek gebruiken"
   },
   "setup": {
     "ready_desc": "Je kunt je eerste stem maken. Stel dicteren nu in of later via Instellingen.",
@@ -2655,7 +2658,12 @@
     "emotion_help": "Gegradueerde emotie — alleen toegepast door de IndexTTS2-engine.",
     "emotion_text": "Emotie beschrijving",
     "emotion_text_ph": "bijv. klinkt uitgeput en verdrietig",
-    "emotion_alpha": "Emotie sterkte"
+    "emotion_alpha": "Emotie sterkte",
+    "from_transcriptions": "Uit transcripties",
+    "import_replace_prompt": "Dit concept bevat al werk. Vervangen, de transcriptie toevoegen of annuleren?",
+    "import_replace": "Vervangen",
+    "import_append": "Toevoegen",
+    "import_cancel": "Annuleren"
   },
   "voicePanel": {
     "title": "Stem",

@@ -331,7 +331,9 @@
     "h_ago": "{{count}}sa önce",
     "failed": "Transkripsiyon başarısız oldu",
     "missing_model": "Yüklü bir konuşmadan metne modeli yok — bu özellik sesi yazıya dökmek için bir model gerektirir.",
-    "original_transcript": "Orijinal transkript"
+    "original_transcript": "Orijinal transkript",
+    "use_in_stories": "Hikayelerde kullan",
+    "use_in_audiobook": "Sesli kitapta kullan"
   },
   "engineRuntime": {
     "ready": "Hazır",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "Tüm satırlarda kullan",
     "deleteProjectConfirm": "Bu proje kalıcı olarak silinsin mi?",
     "moveUp": "Yukarı taşı",
-    "moveDown": "Aşağı taşı"
+    "moveDown": "Aşağı taşı",
+    "from_transcriptions": "Transkripsiyonlardan"
   },
   "audiobook": {
     "cast": "Kadro",
@@ -1772,7 +1775,12 @@
     "emotion_text": "Duygu açıklaması",
     "emotion_text_ph": "örn. tükenmiş ve üzgün geliyor",
     "emotion_alpha": "Duygu gücü",
-    "lex_duplicate": "Her sözcük için tek bir telaffuz kullanın."
+    "lex_duplicate": "Her sözcük için tek bir telaffuz kullanın.",
+    "from_transcriptions": "Transkripsiyonlardan",
+    "import_replace_prompt": "Bu taslakta zaten çalışma var. Değiştirilsin, transkripsiyon eklensin veya iptal edilsin mi?",
+    "import_replace": "Değiştir",
+    "import_append": "Ekle",
+    "import_cancel": "İptal"
   },
   "credentials": {
     "microsoft_key": "Microsoft Çevirmen Anahtarı",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "Asistanın ne yapması gerektiği",
     "inbound_brief_placeholder": "Mesaj al: adını, numarasını ve konusunu sor.",
     "inbound_twilio_note": "Numara, kimlik bilgileri ve karşılama mesajı Twilio sayfasında ayarlanır."
+  },
+  "transcriptionPicker": {
+    "title": "Transkripsiyondan içe aktar",
+    "search_placeholder": "Transkripsiyonları ara…",
+    "empty": "Henüz transkripsiyon yok. Transkripsiyonlar sekmesinde bir tane kaydedin.",
+    "empty_search": "Aramanızla eşleşen transkripsiyon yok."
   }
 }

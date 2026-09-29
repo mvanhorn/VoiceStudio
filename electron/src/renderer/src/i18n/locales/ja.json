@@ -331,7 +331,9 @@
     "h_ago": "{{count}}時間前",
     "failed": "転写に失敗しました",
     "missing_model": "音声認識モデルがインストールされていません — この機能で文字起こしを行うにはモデルが必要です。",
-    "original_transcript": "元の文字起こし"
+    "original_transcript": "元の文字起こし",
+    "use_in_stories": "ストーリーで使用",
+    "use_in_audiobook": "オーディオブックで使用"
   },
   "engineRuntime": {
     "ready": "準備完了",
@@ -1656,7 +1658,8 @@
     "global_speed_apply": "すべての行に適用",
     "deleteProjectConfirm": "このプロジェクトを完全に削除しますか？",
     "moveUp": "上に移動",
-    "moveDown": "下に移動"
+    "moveDown": "下に移動",
+    "from_transcriptions": "文字起こしから"
   },
   "audiobook": {
     "cast": "キャスト",
@@ -1772,7 +1775,12 @@
     "emotion_text": "感情の説明",
     "emotion_text_ph": "例 疲れているように聞こえ、悲しい",
     "emotion_alpha": "感情の強さ",
-    "lex_duplicate": "各単語の発音は1つだけ指定してください。"
+    "lex_duplicate": "各単語の発音は1つだけ指定してください。",
+    "from_transcriptions": "文字起こしから",
+    "import_replace_prompt": "この下書きにはすでに内容があります。置き換える、文字起こしを追加する、またはキャンセルしますか?",
+    "import_replace": "置き換え",
+    "import_append": "追加",
+    "import_cancel": "キャンセル"
   },
   "credentials": {
     "microsoft_key": "Microsoft トランスレータ キー",
@@ -3002,5 +3010,11 @@
     "inbound_brief": "エージェントが行うべきこと",
     "inbound_brief_placeholder": "伝言を受け取る: 名前、電話番号、用件を尋ねてください。",
     "inbound_twilio_note": "番号、認証情報、挨拶メッセージはTwilioページで設定します。"
+  },
+  "transcriptionPicker": {
+    "title": "文字起こしからインポートする",
+    "search_placeholder": "文字起こしを検索…",
+    "empty": "まだ転写はありません。 「文字起こし」タブで 1 つを録音します。",
+    "empty_search": "検索に一致する文字起こしはありません。"
   }
 }
