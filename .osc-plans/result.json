@@ -1,0 +1,229 @@
+{
+  "repo": "debpalash/VoiceStudio",
+  "status": "ok",
+  "plans_written": 2,
+  "plan_files": [
+    ".osc-plans/2026-09-29-121-feat-clone-from-video-plan.md",
+    ".osc-plans/2026-09-29-122-feat-transcription-to-longform-plan.md"
+  ],
+  "chosen_features": [
+    {
+      "title": "feat: clone a voice from a video and pick the speaker",
+      "plan_file": ".osc-plans/2026-09-29-121-feat-clone-from-video-plan.md",
+      "deep_rubric_score": 9,
+      "pre_plan_score": 9,
+      "post_plan_score": 9,
+      "complexity": "M",
+      "source": "novel:cross-ref",
+      "citations": [
+        {
+          "kind": "social",
+          "id": "signal-reddit-wewkyd",
+          "url": "https://www.reddit.com/r/StableDiffusion/comments/1wewkyd/voice_cloning_from_a_very_short_video/"
+        },
+        {
+          "kind": "social",
+          "id": "signal-tiktok-0xdevc",
+          "url": "https://www.tiktok.com/@0xdevc/video/7682017088252251410"
+        },
+        {
+          "kind": "competitor",
+          "id": "cap-pvc-speaker-separate",
+          "competitor": "elevenlabs/elevenlabs",
+          "note": "PVC speaker separation is a cloud API; VoiceStudio already extracts speakers in Dub only"
+        }
+      ],
+      "open_issue_overlap": []
+    },
+    {
+      "title": "feat: turn a transcription into a Stories or Audiobook draft",
+      "plan_file": ".osc-plans/2026-09-29-122-feat-transcription-to-longform-plan.md",
+      "deep_rubric_score": 8,
+      "pre_plan_score": 8,
+      "post_plan_score": 8,
+      "complexity": "S",
+      "source": "novel:theme",
+      "citations": [
+        {
+          "kind": "social",
+          "id": "signal-reddit-voicestudio",
+          "url": "https://www.reddit.com/r/BestGitHubRepos/comments/1wqvy29/voicestudio_a_fully_local_opensource_elevenlabs/"
+        },
+        {
+          "kind": "social",
+          "id": "signal-reddit-narration",
+          "url": "https://www.reddit.com/r/LocalLLaMA/comments/1wbpyp7/best_open_source_tts_right_now_for_narration/"
+        },
+        {
+          "kind": "competitor",
+          "id": "cap-studio-import-transcript",
+          "competitor": "speechify/speechify",
+          "note": "cloud paste-to-audiobook; VoiceStudio has dictation history but no longform handoff"
+        }
+      ],
+      "open_issue_overlap": []
+    }
+  ],
+  "autonomous_check_inputs": {
+    "pre_plan_score": 9,
+    "post_plan_score": 9,
+    "PROCESS_LEVEL": "PR_WELCOME",
+    "NO_AI_OPPOSED": true,
+    "NO_COMPETING_PRS": true,
+    "HAS_PRECEDENT": true,
+    "WARMTH_SCORE": 2,
+    "OPEN_PRS_AUTHORED": 0,
+    "REPO_OPEN_PRS_TOTAL": 30,
+    "IS_OWN_PROJECT": false
+  },
+  "quick_fixes": [
+    {
+      "title": "Local QC warnings on generated speech (silence/clipping/empty/invalid rate)",
+      "note": "open issue #2375 \u2014 run /osc-plan",
+      "issue": 2375
+    },
+    {
+      "title": "Whisper dictation vocabulary hint",
+      "note": "open PR #2395 \u2014 run /osc-plan",
+      "pr": 2395
+    },
+    {
+      "title": "MCP describe_voice / design_voice tools",
+      "note": "open PR #2368 \u2014 already in flight",
+      "pr": 2368
+    }
+  ],
+  "social_pass": {
+    "invoked": true,
+    "engine": {
+      "kind": "active_skill",
+      "script": "/Users/mvanhorn/.claude/skills/osc-newfeature/scripts/social_search.py",
+      "argv": [
+        "/opt/homebrew/opt/python@3.14/bin/python3.14",
+        "/Users/mvanhorn/.claude/skills/osc-newfeature/scripts/social_search.py"
+      ]
+    },
+    "artifact": "social/debpalash-VoiceStudio.json",
+    "status": "ok",
+    "gate": "passed",
+    "reason": null,
+    "repo": "debpalash/VoiceStudio",
+    "topic": "omnivoice-studio-monorepo",
+    "topic_source": "package_json_name",
+    "competitors": [],
+    "competitor_coverage": "skipped_pre_step3",
+    "signals": {
+      "total": 43,
+      "main": 43,
+      "competitors": 0
+    },
+    "source_coverage": {
+      "searched": [
+        "youtube",
+        "tiktok",
+        "reddit"
+      ],
+      "failed": {
+        "x": "HTTPError: 404 Client Error: Not Found for url: https://api.scrapecreators.com/v1/twitter/search/tweets?query=omnivoice-studio-monorepo&sort_by=relevance"
+      }
+    },
+    "completed_at": "2026-09-29T14:38:42.800847+00:00"
+  },
+  "skipped_reasons": {
+    "social_topic_mismatch": "Host topic omnivoice-studio-monorepo (package_json_name) mixed unrelated products: Omarchy Linux, Outlier Omni TTS Elo, k2-fsa/OmniVoice TikToks, Munder Difflin, OmniGet, and other BestGitHubRepos. VoiceStudio-relevant items kept (debpalash/VoiceStudio Reddit/TikTok, local TTS/cloning/narration/diarization/speech-edit threads). Discovery continued from the VoiceStudio codebase and issues.",
+    "competitor_coverage": "skipped_pre_step3"
+  },
+  "competitor_feature_matrix": {
+    "note": "Host social competitor_coverage was skipped_pre_step3; matrix assembled from Deep Step 4 competitor lookup for novelty scoring only.",
+    "competitors": [
+      {
+        "name": "elevenlabs/elevenlabs",
+        "caps": [
+          "instant/professional voice clone from audio (cloud)",
+          "PVC speaker separation API (cloud)",
+          "Studio per-line regen / Projects",
+          "dubbing studio",
+          "dictation not a first-class local global insert"
+        ]
+      },
+      {
+        "name": "descript/descript",
+        "caps": [
+          "Overdub speech edit",
+          "transcript-driven video edit",
+          "cloud"
+        ]
+      },
+      {
+        "name": "speechify/speechify",
+        "caps": [
+          "text/PDF to audiobook",
+          "cloud voices",
+          "no local dictation history handoff"
+        ]
+      }
+    ],
+    "voiceStudio_gaps_selected": [
+      "clone-from-video + local speaker picker in Clone workspace",
+      "transcription history to Stories/Audiobook"
+    ]
+  },
+  "novel_pool": [
+    {
+      "title": "feat: clone a voice from a video and pick the speaker",
+      "cat": 1,
+      "score": 9,
+      "kept": true
+    },
+    {
+      "title": "feat: turn a transcription into a Stories or Audiobook draft",
+      "cat": 3,
+      "score": 8,
+      "kept": true
+    },
+    {
+      "title": "feat: isolate vocals on a clone reference from Tools",
+      "cat": 1,
+      "score": 8,
+      "kept": false,
+      "reason": "overlaps plan 121 isolation step"
+    },
+    {
+      "title": "feat: regenerate only changed sentences in a Clone take",
+      "cat": 1,
+      "score": 7,
+      "kept": false,
+      "reason": "below top-K; longform SegmentCache already covers narration"
+    },
+    {
+      "title": "feat: save a Dub from-video auto-clone as a library voice",
+      "cat": 1,
+      "score": 7,
+      "kept": false,
+      "reason": "below top-K; small promote action"
+    },
+    {
+      "title": "feat: warn on noisy/short/clipped clone references before generate",
+      "cat": 1,
+      "score": 7,
+      "kept": false,
+      "reason": "adjacent to open issue #2375 generated-audio QC"
+    },
+    {
+      "title": "feat: local half-duplex converse workspace",
+      "cat": 1,
+      "score": 6,
+      "kept": false,
+      "reason": "too large to review; Calls/Twilio already shipped"
+    }
+  ],
+  "open_issue_index": {
+    "enhancement_open": [
+      2398,
+      1779,
+      2421,
+      2375
+    ],
+    "keyword_hits_on_chosen": []
+  }
+}
